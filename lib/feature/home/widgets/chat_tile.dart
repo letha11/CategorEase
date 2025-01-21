@@ -1,6 +1,5 @@
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/utils/extension.dart';
-import 'package:categorease/utils/widgets/back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -152,6 +151,7 @@ class ChatTile extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    context.pop();
                     context.push('/choose-category');
                   },
                   style: Theme.of(context).elevatedButtonTheme.style?.copyWith(

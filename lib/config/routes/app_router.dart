@@ -1,5 +1,7 @@
 import 'package:categorease/feature/category/choose_category.dart';
+import 'package:categorease/feature/category/cubit/choose_category_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../feature/home/home_page.dart';
 import '../../feature/authentication/presentation/login_page.dart';
@@ -24,7 +26,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/choose-category',
       builder: (BuildContext context, GoRouterState state) =>
-          const ChooseCategory(),
+          BlocProvider<ChooseCategoryCubit>(
+        create: (context) => ChooseCategoryCubit(),
+        child: ChooseCategory(),
+      ),
     ),
   ],
 );

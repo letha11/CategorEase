@@ -12,7 +12,7 @@ extension DoubleMargin on double {
 
 extension HexColor on String {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  Color fromHex() {
+  Color toColor() {
     final buffer = StringBuffer();
     if (length == 6 || length == 7) buffer.write('ff');
     buffer.write(replaceFirst('#', ''));
