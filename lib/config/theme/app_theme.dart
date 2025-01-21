@@ -108,6 +108,7 @@ class AppTheme {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         backgroundColor: primaryButton,
         foregroundColor: colorScheme.surface,
         textStyle: textTheme.labelMedium,

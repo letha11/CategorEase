@@ -4,6 +4,7 @@ import 'package:categorease/feature/home/widgets/chat_tile.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -56,6 +57,8 @@ class HomePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 16.0),
                       child: CategoryChip(
+                        onTap: () =>
+                            GoRouter.of(context).push('/create-category'),
                         backgroundColor: AppTheme.primaryButton,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 3,

@@ -155,7 +155,6 @@ class ChatTile extends StatelessWidget {
                     context.push('/choose-category');
                   },
                   style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         elevation: const WidgetStatePropertyAll(
                           0,
                         ),

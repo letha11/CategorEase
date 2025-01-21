@@ -7,6 +7,7 @@ class CategoryChip extends StatelessWidget {
     required this.backgroundColor,
     this.category,
     this.child,
+    this.onTap,
     this.padding = const EdgeInsets.symmetric(
       horizontal: 10,
       vertical: 7,
@@ -20,24 +21,29 @@ class CategoryChip extends StatelessWidget {
   final EdgeInsets padding;
   final String? category;
   final Widget? child;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
+    return Material(
+      color: backgroundColor,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(10),
-      ),
-      padding: padding,
-      child: Center(
-        child: child != null
-            ? child!
-            : Text(
-                category!,
-                style: AppTheme.textTheme.labelSmall?.copyWith(
-                  fontSize: 12,
-                ),
-              ),
+        child: Padding(
+          padding: padding,
+          child: Center(
+            child: child != null
+                ? child!
+                : Text(
+                    category!,
+                    style: AppTheme.textTheme.labelSmall?.copyWith(
+                      fontSize: 12,
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }
