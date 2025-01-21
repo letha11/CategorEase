@@ -1,12 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:categorease/feature/category/model/category.dart';
+import 'package:equatable/equatable.dart';
 
 part 'choose_category_state.dart';
 
 class ChooseCategoryCubit extends Cubit<ChooseCategoryState> {
   ChooseCategoryCubit()
       : super(
-          ChooseCategoryState(
+          const ChooseCategoryState(
             categories: [
               Category(id: 1, name: 'Work', hexColor: '347BD5'),
               Category(id: 2, name: 'Friends', hexColor: '6548BC'),
@@ -20,7 +21,8 @@ class ChooseCategoryCubit extends Cubit<ChooseCategoryState> {
         );
 
   void toggleCategory(Category category) {
-    final List<Category> selectedCategories = state.selectedCategories;
+    /// Important, since this makes the list doesn't point into the same memory address, since we uses Equatable this will make the State update.
+    final List<Category> selectedCategories = [...state.selectedCategories];
     if (selectedCategories.contains(category)) {
       selectedCategories.remove(category);
     } else {

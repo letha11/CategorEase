@@ -1,10 +1,10 @@
 part of 'choose_category_cubit.dart';
 
-final class ChooseCategoryState {
+final class ChooseCategoryState extends Equatable {
   final List<Category> categories;
   final List<Category> selectedCategories;
 
-  ChooseCategoryState({
+  const ChooseCategoryState({
     required this.categories,
     required this.selectedCategories,
   });
@@ -18,4 +18,10 @@ final class ChooseCategoryState {
       selectedCategories: selectedCategories ?? this.selectedCategories,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        categories,
+        selectedCategories,
+      ];
 }
