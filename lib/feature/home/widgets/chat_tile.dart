@@ -8,18 +8,20 @@ import 'package:go_router/go_router.dart';
 class ChatTile extends StatelessWidget {
   const ChatTile({
     super.key,
-    required this.profileUrl,
-    required this.username,
-    required this.message,
+    required this.imagePath,
+    required this.roomName,
+    required this.lastMessage,
     required this.unreadCount,
+    required this.onTap,
     this.categories,
   });
 
-  final String profileUrl;
-  final String username;
-  final String message;
+  final String imagePath;
+  final String roomName;
+  final String lastMessage;
   final int unreadCount;
   final List<Widget>? categories;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,57 +29,60 @@ class ChatTile extends StatelessWidget {
       children: [
         7.heightMargin,
         InkWell(
-          onTap: () {
-            debugPrint("chat tapped...");
-          },
+          onTap: onTap,
           child: Container(
             padding:
                 const EdgeInsets.only(top: 7, bottom: 7, left: 16, right: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Material(
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      color: Colors.transparent,
-                      child: Ink.image(
-                        image: NetworkImage(profileUrl),
-                        width: 50,
-                        height: 50,
-                        child: InkWell(
-                          onTap: () => _showDialog(context),
-                        ),
-                      ),
-                    ),
-                    10.widthMargin,
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              username,
-                              style: AppTheme.textTheme.titleSmall,
-                            ),
-                            if (categories != null ||
-                                (categories?.isNotEmpty ?? false))
-                              ...categories!,
-                          ],
-                        ),
-                        Text(
-                          message,
-                          style: AppTheme.textTheme.bodyLarge?.copyWith(
-                            color: unreadCount == 0
-                                ? AppTheme.primaryText.withOpacity(0.5)
-                                : null,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Material(
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        color: Colors.transparent,
+                        child: Ink.image(
+                          image: AssetImage(imagePath),
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            onTap: () => _showDialog(context),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      10.widthMargin,
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  roomName,
+                                  style: AppTheme.textTheme.titleSmall,
+                                ),
+                                if (categories != null ||
+                                    (categories?.isNotEmpty ?? false))
+                                  ...categories!,
+                              ],
+                            ),
+                            Text(
+                              lastMessage,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTheme.textTheme.bodyLarge?.copyWith(
+                                color: unreadCount == 0
+                                    ? AppTheme.primaryText.withOpacity(0.5)
+                                    : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -142,7 +147,7 @@ class ChatTile extends StatelessWidget {
                       topRight: Radius.circular(15),
                     ),
                     image: DecorationImage(
-                      image: NetworkImage(profileUrl),
+                      image: AssetImage(imagePath),
                       fit: BoxFit.cover,
                     ),
                   ),

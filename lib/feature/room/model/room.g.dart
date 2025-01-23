@@ -12,7 +12,12 @@ Room _$RoomFromJson(Map<String, dynamic> json) => Room(
       participants: (json['participants'] as List<dynamic>)
           .map((e) => Participant.fromJson(e as Map<String, dynamic>))
           .toList(),
-      lastChat: Chat.fromJson(json['last_chat'] as Map<String, dynamic>),
+      categories: (json['categories'] as List<dynamic>)
+          .map((e) => Category.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      lastChat: json['last_chat'] == null
+          ? null
+          : Chat.fromJson(json['last_chat'] as Map<String, dynamic>),
       unreadMessageCount: (json['unread_message_count'] as num).toInt(),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -22,6 +27,7 @@ Map<String, dynamic> _$RoomToJson(Room instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'participants': instance.participants,
+      'categories': instance.categories,
       'last_chat': instance.lastChat,
       'unread_message_count': instance.unreadMessageCount,
       'created_at': instance.createdAt.toIso8601String(),

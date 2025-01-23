@@ -6,6 +6,7 @@ import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 
 class CreateCategory extends StatelessWidget {
@@ -111,15 +112,30 @@ class CreateCategory extends StatelessWidget {
                         ),
                       ],
                     ),
+                    KeyboardVisibilityBuilder(builder: (context, isVisible) {
+                      if (isVisible) return 120.heightMargin;
+
+                      return 0.heightMargin;
+                    }),
                   ],
                 ),
               ),
             ),
-            BottomBarButton(
-              onButtonTap: () {
-                GoRouter.of(context).go('/home');
-              },
-            ),
+            KeyboardVisibilityBuilder(builder: (context, isVisible) {
+              if (!isVisible) {
+                return BottomBarButton(
+                  child: ElevatedButton(
+                    onPressed: () => GoRouter.of(context).go('/home'),
+                    child: Text(
+                      'Submit',
+                      style: AppTheme.textTheme.labelMedium,
+                    ),
+                  ),
+                );
+              }
+
+              return const SizedBox.shrink();
+            }),
           ],
         ),
       ),

@@ -5,11 +5,11 @@ class BottomBarButton extends StatelessWidget {
   const BottomBarButton({
     super.key,
     this.withWrapper = true,
-    required this.onButtonTap,
+    required this.child,
   });
 
   final bool withWrapper;
-  final VoidCallback onButtonTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +29,7 @@ class BottomBarButton extends StatelessWidget {
     return Container(
       color: AppTheme.secondaryBackground,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 25),
-      child: ElevatedButton(
-        onPressed: onButtonTap,
-        child: Text(
-          'Submit',
-          style: AppTheme.textTheme.labelMedium,
-        ),
-      ),
+      child: child,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
 import 'package:categorease/feature/home/model/participant.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -9,8 +10,8 @@ class Room {
   final int id;
   final String name;
   final List<Participant> participants;
-  // final List<Category> categories;
-  final Chat lastChat;
+  final List<Category> categories;
+  final Chat? lastChat;
   final int unreadMessageCount;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -19,8 +20,8 @@ class Room {
     required this.id,
     required this.name,
     required this.participants,
-    // required this.categories,
-    required this.lastChat,
+    required this.categories,
+    this.lastChat,
     required this.unreadMessageCount,
     required this.createdAt,
     required this.updatedAt,

@@ -48,7 +48,26 @@ class ChooseCategory extends StatelessWidget {
             ],
           ),
           BottomBarButton(
-            onButtonTap: () => GoRouter.of(context).go('/home'),
+            child: ElevatedButton(
+              onPressed: () {
+                List<String> pathRoutes = GoRouter.of(context)
+                    .routerDelegate
+                    .currentConfiguration
+                    .matches
+                    .map((e) => e.matchedLocation)
+                    .toList();
+
+                if (pathRoutes.contains('/chat-room/1')) {
+                  GoRouter.of(context).pop();
+                } else {
+                  GoRouter.of(context).go('/home');
+                }
+              },
+              child: Text(
+                'Submit',
+                style: AppTheme.textTheme.labelMedium,
+              ),
+            ),
           ),
         ],
       ),

@@ -92,6 +92,7 @@ class AppTheme {
       selectionHandleColor: colorScheme.onSurface,
     ),
     inputDecorationTheme: InputDecorationTheme(
+      isDense: true,
       fillColor: primaryInput,
       filled: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
