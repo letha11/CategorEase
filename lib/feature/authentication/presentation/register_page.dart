@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/widgets/back_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -37,7 +38,7 @@ class RegisterPage extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 37),
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: SvgPicture.asset('assets/images/logo-rounded.svg'),
+                      child: SvgPicture.asset(Assets.images.logoRounded),
                     ),
                   ),
                 ],

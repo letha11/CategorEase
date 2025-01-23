@@ -1,3 +1,4 @@
+import 'package:categorease/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,7 @@ class AppBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => context.pop(),
-      child: SvgPicture.asset('assets/images/back.svg'),
+      child: SvgPicture.asset(Assets.icons.back),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -27,7 +28,7 @@ class LoginPage extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 37),
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: SvgPicture.asset('assets/images/logo-rounded.svg'),
+                  child: SvgPicture.asset(Assets.images.logoRounded),
                 ),
               ),
             ),
@@ -99,7 +100,7 @@ class LoginPage extends StatelessWidget {
                   25.heightMargin,
                   ElevatedButton.icon(
                     onPressed: () {},
-                    icon: SvgPicture.asset('assets/images/google-logo.svg'),
+                    icon: SvgPicture.asset(Assets.icons.googleLogo),
                     label: const Text('Login with Google'),
                   ),
                   67.heightMargin

@@ -1,6 +1,7 @@
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/feature/home/widgets/chat_tile.dart';
+import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -65,7 +66,7 @@ class HomePage extends StatelessWidget {
                           vertical: 2.5,
                         ),
                         child: SvgPicture.asset(
-                          'assets/images/add.svg',
+                          Assets.icons.add,
                         ),
                       ),
                     ),
@@ -88,7 +89,7 @@ class HomePage extends StatelessWidget {
                       suffixIcon: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: SvgPicture.asset(
-                          'assets/images/search.svg',
+                          Assets.icons.search,
                         ),
                       ),
                     ),

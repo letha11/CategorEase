@@ -1,4 +1,5 @@
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -172,7 +173,7 @@ class ChatTile extends StatelessWidget {
                         ),
                       ),
                   child: SvgPicture.asset(
-                    "assets/images/category.svg",
+                    Assets.icons.category,
                   ),
                 ),
               ),
