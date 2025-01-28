@@ -8,6 +8,7 @@ class AppTheme {
   static const Color primaryText = Color(0xFFE0E1DD);
   static const Color primaryButton = Color(0xFFE6E6E6);
   static const Color activeColor = Color(0xFF347BD5);
+  static const Color errorColor = Color(0xFFD84040);
 
   static const colorScheme = ColorScheme.dark(
     surface: primaryBackground,
@@ -95,6 +96,9 @@ class AppTheme {
       isDense: true,
       fillColor: primaryInput,
       filled: true,
+      errorStyle: textTheme.bodySmall?.copyWith(
+        color: errorColor,
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
       hintStyle: textTheme.bodyMedium?.copyWith(
         color: colorScheme.onSurface.withOpacity(0.5),

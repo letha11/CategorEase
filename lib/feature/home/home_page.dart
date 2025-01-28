@@ -19,6 +19,16 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chats'),
+        actions: [
+          IconButton(
+            icon: SvgPicture.asset(
+              Assets.icons.setting,
+            ),
+            onPressed: () {
+              GoRouter.of(context).push('/setting');
+            },
+          ),
+        ],
       ),
       body: CustomScrollView(
         slivers: [

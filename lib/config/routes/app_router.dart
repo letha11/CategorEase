@@ -1,3 +1,7 @@
+import 'package:categorease/core/auth_storage.dart';
+import 'package:categorease/core/service_locator.dart';
+import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
+import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
@@ -7,24 +11,42 @@ import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
 import 'package:categorease/feature/room/create_room.dart';
 import 'package:categorease/feature/search/search_page.dart';
+import 'package:categorease/feature/setting/setting_page.dart';
+import 'package:categorease/utils/widgets/splash_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../feature/home/home_page.dart';
-import '../../feature/authentication/presentation/login_page.dart';
-import '../../feature/authentication/presentation/register_page.dart';
+import '../../feature/authentication/login_page.dart';
+import '../../feature/authentication/register_page.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/splash',
   routes: [
     GoRoute(
+      path: '/splash',
+      builder: (BuildContext context, GoRouterState state) {
+        return const SplashPage();
+      },
+    ),
+    GoRoute(
+      path: '/setting',
+      builder: (context, state) {
+        return const SettingPage();
+      },
+    ),
+    GoRoute(
       path: '/login',
-      builder: (BuildContext context, GoRouterState state) => const LoginPage(),
+      builder: (BuildContext context, GoRouterState state) => LoginPage(),
     ),
     GoRoute(
       path: '/register',
-      builder: (BuildContext context, GoRouterState state) =>
-          const RegisterPage(),
+      builder: (BuildContext context, GoRouterState state) => BlocProvider(
+        create: (context) => AuthBloc(
+          authRepository: sl<AuthRepository>(),
+        ),
+        child: RegisterPage(),
+      ),
     ),
     GoRoute(
       path: '/home',

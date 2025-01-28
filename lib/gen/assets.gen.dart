@@ -27,8 +27,11 @@ class $AssetsIconsGen {
   /// File path: assets/icons/search.svg
   String get search => 'assets/icons/search.svg';
 
+  /// File path: assets/icons/setting.svg
+  String get setting => 'assets/icons/setting.svg';
+
   /// List of all assets
-  List<String> get values => [add, back, category, googleLogo, search];
+  List<String> get values => [add, back, category, googleLogo, search, setting];
 }
 
 class $AssetsImagesGen {
@@ -44,8 +47,11 @@ class $AssetsImagesGen {
   /// File path: assets/images/logo-rounded.svg
   String get logoRounded => 'assets/images/logo-rounded.svg';
 
+  /// File path: assets/images/logo.png
+  AssetGenImage get logoPng => const AssetGenImage('assets/images/logo.png');
+
   /// File path: assets/images/logo.svg
-  String get logo => 'assets/images/logo.svg';
+  String get logoSvg => 'assets/images/logo.svg';
 
   /// File path: assets/images/no-data.svg
   String get noData => 'assets/images/no-data.svg';
@@ -59,7 +65,8 @@ class $AssetsImagesGen {
         groupDefaultPng,
         groupDefaultSvg,
         logoRounded,
-        logo,
+        logoPng,
+        logoSvg,
         noData,
         singleDefault
       ];

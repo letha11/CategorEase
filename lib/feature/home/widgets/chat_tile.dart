@@ -34,7 +34,6 @@ class ChatTile extends StatelessWidget {
             padding:
                 const EdgeInsets.only(top: 7, bottom: 7, left: 16, right: 16),
             child: Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
