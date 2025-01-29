@@ -18,6 +18,7 @@ void initServiceLocator() {
   sl.registerLazySingleton<DioClient>(
     () => DioClient(
       authStorage: sl(),
+      logger: sl(),
     ),
   );
 

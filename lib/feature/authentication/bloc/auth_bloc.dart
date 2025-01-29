@@ -23,7 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _authRepository.login(event.username, event.password);
 
     result.match(
-      (failure) => emit(const AuthFailed()),
+      (failure) => emit(AuthFailed(message: failure.message)),
       (success) => emit(AuthSuccess(success)),
     );
   }

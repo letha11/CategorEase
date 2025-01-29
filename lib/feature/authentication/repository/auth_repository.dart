@@ -47,6 +47,8 @@ class AuthRepositoryImpl extends AuthRepository {
 
       _logger.warning('Login failed', response);
       return left(const AuthFailure());
+    } on DioException catch (e) {
+      return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Login error', e, s);
       return left(Failure(exception: e));
@@ -90,7 +92,7 @@ class AuthRepositoryImpl extends AuthRepository {
       }
 
       _logger.error('Register error', e, s);
-      return left(Failure(exception: e));
+      return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Register error', e, s);
       return left(Failure(exception: e));

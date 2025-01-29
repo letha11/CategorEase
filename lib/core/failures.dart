@@ -14,3 +14,13 @@ class AuthFailure extends Failure {
   const AuthFailure({String? message, super.exception})
       : super(message: message ?? 'Authentication Failed');
 }
+
+class ServerFailure extends Failure {
+  const ServerFailure({String? message, super.exception})
+      : super(message: message ?? 'Server error, please try again later');
+}
+
+class TimeoutFailure extends Failure {
+  const TimeoutFailure({String? message, super.exception})
+      : super(message: message ?? 'Timeout, please try again later');
+}

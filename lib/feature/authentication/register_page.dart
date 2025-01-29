@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:categorease/config/routes/app_router.dart';
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/gen/assets.gen.dart';
