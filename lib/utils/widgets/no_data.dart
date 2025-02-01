@@ -21,7 +21,7 @@ class NoData extends StatelessWidget {
       children: [
         SvgPicture.asset(Assets.images.noData),
         Text(
-          'No Message found',
+          message,
           textAlign: TextAlign.center,
           style: AppTheme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
@@ -29,7 +29,7 @@ class NoData extends StatelessWidget {
         ),
         if (subMessage != null || (subMessage?.isNotEmpty ?? false))
           Text(
-            'Try sending a message first',
+            subMessage!,
             textAlign: TextAlign.center,
             style: AppTheme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w300,
