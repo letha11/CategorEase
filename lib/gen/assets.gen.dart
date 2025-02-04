@@ -24,6 +24,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/google-logo.svg
   String get googleLogo => 'assets/icons/google-logo.svg';
 
+  /// File path: assets/icons/info.svg
+  String get info => 'assets/icons/info.svg';
+
   /// File path: assets/icons/search.svg
   String get search => 'assets/icons/search.svg';
 
@@ -31,7 +34,8 @@ class $AssetsIconsGen {
   String get setting => 'assets/icons/setting.svg';
 
   /// List of all assets
-  List<String> get values => [add, back, category, googleLogo, search, setting];
+  List<String> get values =>
+      [add, back, category, googleLogo, info, search, setting];
 }
 
 class $AssetsImagesGen {

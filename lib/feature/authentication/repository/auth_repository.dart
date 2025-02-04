@@ -2,11 +2,13 @@ import 'package:categorease/core/app_logger.dart';
 import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/core/failures.dart';
+import 'package:categorease/utils/extension.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract class AuthRepository {
   Future<Either<Failure, bool>> login(String username, String password);
+  Future<Either<Failure, bool>> refreshToken(String refreshToken);
   Future<Either<Failure, bool>> register(
       String username, String password, String confirmPassword);
   Future<Either<Failure, bool>> logout();
@@ -48,6 +50,11 @@ class AuthRepositoryImpl extends AuthRepository {
       _logger.warning('Login failed', response);
       return left(const AuthFailure());
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return left(
+            const Failure(message: 'Wrong username or password, try again'));
+      }
+
       return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Login error', e, s);
@@ -82,13 +89,13 @@ class AuthRepositoryImpl extends AuthRepository {
     } on DioException catch (e, s) {
       if (e.response?.statusCode == 409) {
         _logger.warning('Register failed', e.response);
-        return left(AuthFailure(
-            message: e.response?.data['message'] ?? 'User already exists'));
+        return left(
+            AuthFailure(message: e.messageData ?? 'User already exists'));
       } else if (e.response?.statusCode == 422) {
         _logger.warning('Register failed', e.response);
         return left(AuthFailure(
-            message: e.response?.data['message'] ??
-                'Password and confirm password do not match'));
+            message:
+                e.messageData ?? 'Password and confirm password do not match'));
       }
 
       _logger.error('Register error', e, s);
@@ -107,6 +114,36 @@ class AuthRepositoryImpl extends AuthRepository {
       return right(false);
     } catch (e, s) {
       _logger.error('Logout error', e, s);
+      return left(Failure(exception: e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> refreshToken(String refreshToken) async {
+    try {
+      final response = await _dioClient.dio.post(
+        '/auth/refresh-token',
+        data: FormData.fromMap({
+          'refresh_token': refreshToken,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        _logger.warning('Failed refreshing the token', response);
+        return left(const Failure());
+      }
+
+      _authStorage.clearTokens();
+      final data = response.data['data'];
+      await _authStorage.setAccessToken(data['access_token']);
+      await _authStorage.setRefreshToken(data['refresh_token']);
+
+      _logger.info('Success refreshing the token', response);
+      return right(true);
+    } on DioException catch (e) {
+      return left(_dioClient.parseError(e));
+    } catch (e, s) {
+      _logger.error('Login error', e, s);
       return left(Failure(exception: e));
     }
   }

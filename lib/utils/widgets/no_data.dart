@@ -33,6 +33,7 @@ class NoData extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppTheme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w300,
+              color: AppTheme.primaryText.withOpacity(0.5),
             ),
           ),
       ],

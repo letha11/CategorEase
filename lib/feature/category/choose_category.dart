@@ -1,11 +1,7 @@
-import 'package:categorease/config/routes/app_router.dart';
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
-import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
 import 'package:categorease/feature/category/widget/category_tile.dart';
-import 'package:categorease/feature/home/widgets/category_chip.dart';
-import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';

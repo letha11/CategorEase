@@ -71,6 +71,7 @@ class ConsoleOutput extends LogOutput {
       event.lines.forEach(debugPrint);
     } else {
       event.lines.forEach(developer.log);
+      // event.lines.forEach(print);
     }
   }
 }

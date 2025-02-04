@@ -1,6 +1,8 @@
 import 'package:categorease/core/app_logger.dart';
 import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/failures.dart';
+import 'package:categorease/core/service_locator.dart';
+import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/utils/constants.dart';
 import 'package:dio/dio.dart';
 
@@ -43,15 +45,6 @@ class DioClient {
         return handler.next(options);
       });
 
-  InterceptorsWrapper _tokenInterceptor() => InterceptorsWrapper(
-        onRequest:
-            (RequestOptions options, RequestInterceptorHandler handler) async {
-          final accessToken = await _authStorage.getAccessToken();
-          options.headers['Authorization'] = 'Bearer $accessToken';
-          return handler.next(options);
-        },
-      );
-
   InterceptorsWrapper _refreshTokenInterceptor() => InterceptorsWrapper(
         onRequest:
             (RequestOptions options, RequestInterceptorHandler handler) async {
@@ -70,7 +63,11 @@ class DioClient {
   }
 
   Dio get dioWithToken {
-    _dio.interceptors.add(_tokenInterceptor());
+    _dio.interceptors.add(TokenInterceptor(
+      authStorage: _authStorage,
+      authRepository: sl(),
+      logger: _logger,
+    ));
 
     return _dio;
   }
@@ -79,6 +76,13 @@ class DioClient {
     final type = exception.type;
 
     _logger.warning('Dio error', exception);
+
+    if (exception.response?.statusCode == 403 ||
+        exception.response?.statusCode == 401) {
+      return const UnauthorizedFailure();
+    } else if (exception.response?.statusCode == 422) {
+      return const UnprocessableContent();
+    }
 
     switch (type) {
       case DioExceptionType.connectionTimeout:
@@ -94,5 +98,85 @@ class DioClient {
       default:
         return const Failure(message: 'Server error, please try again later');
     }
+  }
+}
+
+class TokenInterceptor extends Interceptor {
+  final AuthStorage _authStorage;
+  final AuthRepository _authRepository;
+  final AppLogger _logger;
+
+  TokenInterceptor({
+    required AuthStorage authStorage,
+    required AuthRepository authRepository,
+    required AppLogger logger,
+  })  : _authStorage = authStorage,
+        _authRepository = authRepository,
+        _logger = logger;
+
+  @override
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    final accessToken = await _authStorage.getAccessToken();
+    options.headers['Authorization'] = 'Bearer $accessToken';
+    return handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 401) {
+      String? refreshToken = await _authStorage.getRefreshToken();
+
+      if (refreshToken == null) {
+        return handler.reject(err);
+      }
+      _logger.info('Performing renewing token');
+
+      await Future.delayed(const Duration(seconds: 1));
+      await _authRepository.refreshToken(refreshToken);
+      final response = await _getRetryRequest(err);
+      return handler.resolve(response);
+    }
+    return handler.next(err);
+  }
+
+  Future<Response> _getRetryRequest(DioException err) async {
+    if (err.response == null) {
+      throw err;
+    }
+
+    String? freshToken = await _authStorage.getAccessToken();
+    if (freshToken == null) {
+      throw err;
+    }
+
+    final requestOptions = err.response!.requestOptions;
+    requestOptions.headers['Authorization'] = 'Bearer $freshToken';
+
+    final options = Options(
+      method: requestOptions.method,
+      headers: requestOptions.headers,
+    );
+
+    final dioRefresh = Dio(
+      BaseOptions(
+        baseUrl: requestOptions.baseUrl,
+        headers: <String, String>{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    dioRefresh.interceptors.add(this);
+
+    final response = await dioRefresh.request(
+      requestOptions.path,
+      data: requestOptions.data,
+      queryParameters: requestOptions.queryParameters,
+      options: options,
+    );
+
+    return response;
   }
 }

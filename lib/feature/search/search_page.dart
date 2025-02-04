@@ -3,7 +3,6 @@ import 'package:categorease/feature/search/widgets/search_delegate.dart';
 import 'package:categorease/feature/search/widgets/user_tile.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
-import 'package:categorease/utils/widgets/no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 

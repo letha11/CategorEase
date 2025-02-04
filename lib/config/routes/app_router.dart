@@ -1,4 +1,3 @@
-import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
@@ -8,6 +7,7 @@ import 'package:categorease/feature/category/cubit/choose_category/choose_catego
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
+import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
 import 'package:categorease/feature/room/create_room.dart';
 import 'package:categorease/feature/search/search_page.dart';
@@ -50,9 +50,15 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (BuildContext context, GoRouterState state) =>
-          BlocProvider<HomePageCubit>(
-        create: (context) => HomePageCubit(),
+      builder: (BuildContext context, GoRouterState state) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => HomePageCubit(),
+          ),
+          BlocProvider(
+            create: (context) => sl<HomeBloc>()..add(FetchDataHome()),
+          ),
+        ],
         child: const HomePage(),
       ),
     ),

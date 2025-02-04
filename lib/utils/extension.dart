@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -33,6 +34,12 @@ extension HexColor on String {
 }
 
 extension FormattedDate on DateTime {
+  String toHourFormattedString() {
+    final hourFormatter = DateFormat('HH:mmaaa');
+
+    return hourFormatter.format(this);
+  }
+
   String toFormattedString() {
     DateTime now = DateTime.now();
     final fullFormatter = DateFormat('d-MM-yyyy, HH:mm');
@@ -46,6 +53,10 @@ extension FormattedDate on DateTime {
 
     return fullFormatter.format(this);
   }
+}
+
+extension DioExceptionExt on DioException {
+  String? get messageData => response?.data['message'];
 }
 
 extension GoRouterExt on GoRouter {

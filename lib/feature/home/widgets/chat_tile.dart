@@ -13,12 +13,14 @@ class ChatTile extends StatelessWidget {
     required this.lastMessage,
     required this.unreadCount,
     required this.onTap,
+    this.lastMessageSentAt,
     this.categories,
   });
 
   final String imagePath;
   final String roomName;
   final String lastMessage;
+  final DateTime? lastMessageSentAt;
   final int unreadCount;
   final List<Widget>? categories;
   final VoidCallback onTap;
@@ -57,16 +59,31 @@ class ChatTile extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Text(
-                                  roomName,
-                                  style: AppTheme.textTheme.titleSmall,
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () {},
+                                child: SizedBox(
+                                  height: 25,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: ListView(
+                                      scrollDirection: Axis.horizontal,
+                                      children: [
+                                        Text(
+                                          roomName,
+                                          style: AppTheme.textTheme.titleSmall,
+                                        ),
+                                        if (categories != null ||
+                                            (categories?.isNotEmpty ?? false))
+                                          ...categories!,
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                if (categories != null ||
-                                    (categories?.isNotEmpty ?? false))
-                                  ...categories!,
-                              ],
+                              ),
                             ),
                             Text(
                               lastMessage,
@@ -87,7 +104,7 @@ class ChatTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      '11.45pm',
+                      lastMessageSentAt?.toHourFormattedString() ?? '.. : ..',
                       style: AppTheme.textTheme.bodyMedium?.copyWith(
                         color: AppTheme.primaryText.withOpacity(0.5),
                       ),

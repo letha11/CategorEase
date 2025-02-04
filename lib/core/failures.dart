@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Failure extends Equatable {
-  final String? message;
+  final String message;
   final Object? exception;
 
   const Failure({this.message = "Something went wrong", this.exception});
@@ -23,4 +23,16 @@ class ServerFailure extends Failure {
 class TimeoutFailure extends Failure {
   const TimeoutFailure({String? message, super.exception})
       : super(message: message ?? 'Timeout, please try again later');
+}
+
+class UnauthorizedFailure extends Failure {
+  const UnauthorizedFailure({String? message, super.exception})
+      : super(message: message ?? 'Unauthorized, please login again');
+}
+
+class UnprocessableContent extends Failure {
+  const UnprocessableContent({String? message, super.exception})
+      : super(
+            message:
+                message ?? 'Invalid data provided, please check your input');
 }

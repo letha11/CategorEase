@@ -1,0 +1,172 @@
+import 'package:categorease/core/app_logger.dart';
+import 'package:categorease/core/dio_client.dart';
+import 'package:categorease/core/failures.dart';
+import 'package:categorease/feature/room/model/room.dart';
+import 'package:categorease/utils/api_response.dart';
+import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
+
+abstract class RoomRepository {
+  Future<Either<Failure, PaginationApiResponse<Room>>> getAllAssociated(
+      {List<int>? categoriesId});
+  Future<Either<Failure, bool>> create({
+    required String roomName,
+    required List<int> usersId,
+    List<int>? categoriesId,
+  });
+  Future<Either<Failure, bool>> update(
+    int roomId, {
+    required String roomName,
+    required List<int> usersId,
+    List<int>? categoriesId,
+  });
+  Future<Either<Failure, bool>> deleteRoom(String roomId);
+}
+
+class RoomRepositoryImpl implements RoomRepository {
+  final DioClient _dioClient;
+  final AppLogger _logger;
+
+  RoomRepositoryImpl({
+    required DioClient dioClient,
+    AppLogger? logger,
+  })  : _dioClient = dioClient,
+        _logger = logger ?? AppLoggerImpl();
+
+  @override
+  Future<Either<Failure, bool>> create({
+    required String roomName,
+    required List<int> usersId,
+    List<int>? categoriesId,
+  }) async {
+    assert(usersId.length > 1, 'Room must have at least 2 users');
+
+    try {
+      Map<String, dynamic> data = {
+        'name': roomName,
+        'users': usersId,
+      };
+
+      if (categoriesId != null || (categoriesId?.isNotEmpty ?? false)) {
+        data['categories'] = categoriesId;
+      }
+
+      final response = await _dioClient.dioWithToken.post(
+        '/room',
+        data: FormData.fromMap(data),
+      );
+
+      if (response.statusCode != 201) {
+        _logger.warning('Failed creating room');
+        return left(const Failure());
+      }
+
+      _logger.info('Success creating room');
+      return right(true);
+    } on DioException catch (e, s) {
+      _logger.warning('Failed creating room', e, s);
+
+      return left(_dioClient.parseError(e));
+    } catch (e, s) {
+      _logger.error('Error creating room', e, s);
+      return left(Failure(exception: e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> deleteRoom(String roomId) async {
+    // FIX: not yet implemented from backend
+    throw UnimplementedError();
+    // try {
+    //   final response = await _dioClient.dioWithToken.delete('/room/$roomId');
+    //
+    //   if (response.statusCode != 200) {
+    //     _logger.warning('Failed deleting room');
+    //     return left(const Failure());
+    //   }
+    //
+    //   _logger.info('Success deleting room');
+    //   return right(true);
+    // } on DioException catch (e, s) {
+    //   _logger.warning('Failed deleting room', e, s);
+    //   if (e.response?.statusCode == 403) {
+    //     return left(UnauthorizedFailure(message: e.messageData));
+    //   }
+    //
+    //   return left(_dioClient.parseError(e));
+    // } catch (e, s) {
+    //   _logger.error('Error deleting room', e, s);
+    //   return left(Failure(exception: e));
+    // }
+  }
+
+  @override
+  Future<Either<Failure, PaginationApiResponse<Room>>> getAllAssociated({
+    List<int>? categoriesId,
+  }) async {
+    try {
+      final response = await _dioClient.dioWithToken.get('/room');
+
+      if (response.statusCode != 200) {
+        _logger.warning('Failed getting rooms');
+        return left(const Failure());
+      }
+
+      final paginationResponse = PaginationApiResponse.fromJson(
+        response.data,
+        List.from(response.data['data']).map((e) => Room.fromJson(e)).toList(),
+      );
+
+      _logger.info("Success Getting rooms");
+      return right(paginationResponse);
+    } on DioException catch (e, s) {
+      _logger.warning('Failed getting rooms', e, s);
+
+      return left(_dioClient.parseError(e));
+    } catch (e, s) {
+      _logger.error('Error getting rooms', e, s);
+      return left(Failure(exception: e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> update(
+    int roomId, {
+    required String roomName,
+    required List<int> usersId,
+    List<int>? categoriesId,
+  }) async {
+    assert(usersId.length > 1, 'Room must have at least 2 users');
+
+    try {
+      Map<String, dynamic> data = {
+        'name': roomName,
+        'users': usersId,
+      };
+
+      if (categoriesId != null || (categoriesId?.isNotEmpty ?? false)) {
+        data['categories'] = categoriesId;
+      }
+
+      final response = await _dioClient.dioWithToken.put(
+        '/room/$roomId',
+        data: FormData.fromMap(data),
+      );
+
+      if (response.statusCode != 200) {
+        _logger.warning('Failed updating room');
+        return left(const Failure());
+      }
+
+      _logger.info('Success updating room');
+      return right(true);
+    } on DioException catch (e, s) {
+      _logger.warning('Failed updating room', e, s);
+
+      return left(_dioClient.parseError(e));
+    } catch (e, s) {
+      _logger.error('Error updating room', e, s);
+      return left(Failure(exception: e));
+    }
+  }
+}
