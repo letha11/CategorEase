@@ -1,7 +1,4 @@
 import 'package:categorease/config/theme/app_theme.dart';
-import 'package:categorease/core/auth_storage.dart';
-import 'package:categorease/core/service_locator.dart';
-import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
 import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
@@ -14,7 +11,6 @@ import 'package:categorease/utils/widgets/error_widget.dart';
 import 'package:categorease/utils/widgets/loading.dart';
 import 'package:categorease/utils/widgets/no_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -139,7 +135,6 @@ class _ChatRoomState extends State<ChatRoom> {
                       return SliverList.builder(
                         itemCount: state.chats.data.length,
                         itemBuilder: (context, i) {
-                          // FIXME: should change to the authenticated user later
                           final homeState =
                               context.read<HomeBloc>().state as HomeLoaded;
                           final isSender = state.chats.data[i].isSender(
@@ -261,157 +256,6 @@ class _ChatRoomState extends State<ChatRoom> {
                   ),
                 ],
               ),
-              // child: Column(
-              //   mainAxisSize: MainAxisSize.max,
-              //   children: [
-              //     Expanded(flex: 1, child: Text("henlo/")),
-              //     Expanded(
-              //       flex: 20,
-              //       child: BlocBuilder<ChatBloc, ChatState>(
-              //         builder: (context, state) {
-              //           if (state is ChatInitialLoading ||
-              //               state is ChatInitial) {
-              //             return const Center(child: Loading());
-              //           } else if (state is ChatInitialError) {
-              //             final message = state.failure?.message;
-              //             return AppErrorWidget(
-              //               message:
-              //                   message ?? 'Something went wrong, try again',
-              //             );
-              //           }
-              //
-              //           if (state is! ChatInitialLoaded) {
-              //             return const AppErrorWidget(
-              //               message: 'Something went wrong, try again',
-              //             );
-              //           }
-              //
-              //           if (state.chats.data.isEmpty) {
-              //             return const NoData(
-              //               message: 'No Message found',
-              //               subMessage: 'Try sending a message first',
-              //             );
-              //           }
-              //
-              //           blocState = state;
-              //
-              //           return ListView.builder(
-              //             controller: cubitState.scrollController,
-              //             reverse: true,
-              //             itemCount: state.chats.data.length,
-              //             itemBuilder: (context, i) {
-              //               // FIXME: should change to the authenticated user later
-              //               final homeState =
-              //                   context.read<HomeBloc>().state as HomeLoaded;
-              //               final isSender = state.chats.data[i].isSender(
-              //                 homeState.authenticatedUser.username,
-              //               );
-              //               final Chat chat = state.chats.data[i];
-              //
-              //               return Row(
-              //                 children: [
-              //                   Text(chat.id.toString()),
-              //                   Align(
-              //                     alignment: isSender
-              //                         ? Alignment.centerRight
-              //                         : Alignment.centerLeft,
-              //                     child: ConstrainedBox(
-              //                       constraints: BoxConstraints(
-              //                         maxWidth:
-              //                             MediaQuery.of(context).size.height *
-              //                                     0.5 -
-              //                                 (16 * 2),
-              //                       ),
-              //                       child: Container(
-              //                         padding: const EdgeInsets.all(10),
-              //
-              //                         /// List are reversed
-              //                         margin: EdgeInsets.only(
-              //                           bottom: i == 0 ? 70 : 8,
-              //                           left: isSender
-              //                               ? MediaQuery.of(context)
-              //                                       .size
-              //                                       .width *
-              //                                   0.2
-              //                               : 16,
-              //                           right: isSender
-              //                               ? 16
-              //                               : MediaQuery.of(context)
-              //                                       .size
-              //                                       .width *
-              //                                   0.2,
-              //                           top: i == (state.chats.data.length - 1)
-              //                               ? 16
-              //                               : 8,
-              //                         ),
-              //                         decoration: BoxDecoration(
-              //                           color: isSender
-              //                               ? AppTheme.secondaryBackground
-              //                               : AppTheme.primaryInput,
-              //                           borderRadius: BorderRadius.circular(15),
-              //                         ),
-              //                         child: Column(
-              //                           mainAxisSize: MainAxisSize.min,
-              //                           crossAxisAlignment: isSender
-              //                               ? CrossAxisAlignment.end
-              //                               : CrossAxisAlignment.start,
-              //                           children: [
-              //                             if (!isSender) // FIXME: only show this on group(room that have greater than 2 user) room
-              //                               Text(
-              //                                 chat.sentBy,
-              //                                 style: AppTheme
-              //                                     .textTheme.titleSmall
-              //                                     ?.copyWith(fontSize: 14),
-              //                               ),
-              //                             Text(
-              //                               chat.content,
-              //                               textAlign: TextAlign.right,
-              //                               style: AppTheme.textTheme.bodyLarge,
-              //                             ),
-              //                             5.heightMargin,
-              //                             Text(
-              //                               chat.updatedAt.toFormattedString(),
-              //                               style: AppTheme.textTheme.bodyMedium
-              //                                   ?.copyWith(
-              //                                 color: AppTheme.primaryText
-              //                                     .withOpacity(0.5),
-              //                               ),
-              //                             ),
-              //                             // Builder(builder: (context) {
-              //                             //   return Row(
-              //                             //     mainAxisAlignment: isSender
-              //                             //         ? MainAxisAlignment.spaceBetween
-              //                             //         : MainAxisAlignment.end,
-              //                             //     children: [
-              //                             //       Text(
-              //                             //         chat.updatedAt.toFormattedString(),
-              //                             //         style:
-              //                             //             AppTheme.textTheme.bodyMedium?.copyWith(
-              //                             //           color:
-              //                             //               AppTheme.primaryText.withOpacity(0.5),
-              //                             //         ),
-              //                             //       ),
-              //                             //       // if (isSender)
-              //                             //       //   SeenIcon(
-              //                             //       //     isSeen: true,
-              //                             //       //   ),
-              //                             //     ],
-              //                             //   );
-              //                             // }),
-              //                           ],
-              //                         ),
-              //                       ),
-              //                     ),
-              //                   ),
-              //                 ],
-              //               );
-              //             },
-              //           );
-              //         },
-              //       ),
-              //     ),
-              //   ],
-              // ),
             ),
             BottomBarButton(
               withWrapper: true,

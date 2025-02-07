@@ -14,7 +14,7 @@ class DioClient {
   late final CancelToken _cancelToken;
 
   final _options = BaseOptions(
-    baseUrl: Constants.baseUrl,
+    baseUrl: Constants.baseUrlHttp,
   );
 
   DioClient({
@@ -110,6 +110,8 @@ class TokenInterceptor extends Interceptor {
   final AuthStorage _authStorage;
   final AuthRepository _authRepository;
   final AppLogger _logger;
+  final int _maxRetry = 3;
+  int _retryCount = 0;
 
   TokenInterceptor({
     required AuthStorage authStorage,
@@ -129,13 +131,14 @@ class TokenInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
+    if (err.response?.statusCode == 401 && _retryCount <= _maxRetry) {
       String? refreshToken = await _authStorage.getRefreshToken();
 
       if (refreshToken == null) {
         return handler.reject(err);
       }
       _logger.info('Performing renewing token');
+      _retryCount++;
 
       await Future.delayed(const Duration(seconds: 1));
       await _authRepository.refreshToken(refreshToken);
