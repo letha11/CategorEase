@@ -5,6 +5,7 @@ import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
+import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
@@ -55,9 +56,6 @@ final GoRouter appRouter = GoRouter(
           BlocProvider(
             create: (context) => HomePageCubit(),
           ),
-          BlocProvider(
-            create: (context) => sl<HomeBloc>()..add(FetchDataHome()),
-          ),
         ],
         child: const HomePage(),
       ),
@@ -87,9 +85,23 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         final roomId = state.pathParameters['room_id'];
 
-        return BlocProvider<ChatRoomCubit>(
-          create: (context) => ChatRoomCubit(),
-          child: ChatRoom(),
+        assert(roomId != null || roomId != '', 'Room id is required');
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ChatRoomCubit>(
+              create: (context) => ChatRoomCubit(),
+            ),
+            BlocProvider<ChatBloc>(
+              create: (context) => sl<ChatBloc>(),
+              // ..add(
+              //   FetchChat(roomId: int.tryParse(roomId!) ?? 0),
+              // ),
+            ),
+          ],
+          child: ChatRoom(
+            roomId: int.parse(roomId!),
+          ),
         );
       },
     ),

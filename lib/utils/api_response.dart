@@ -43,6 +43,24 @@ class PaginationApiResponse<T> {
     required this.data,
   });
 
+  PaginationApiResponse<T> copyWith({
+    int? totalPage,
+    int? recordPerPage,
+    int? currentPage,
+    int? previous,
+    int? next,
+    List<T>? data,
+  }) {
+    return PaginationApiResponse(
+      totalPage: totalPage ?? this.totalPage,
+      recordPerPage: recordPerPage ?? this.recordPerPage,
+      currentPage: currentPage ?? this.currentPage,
+      previous: previous ?? this.previous,
+      next: next ?? this.next,
+      data: data ?? this.data,
+    );
+  }
+
   factory PaginationApiResponse.fromJson(
     Map<String, dynamic> json,
     List<T> data,

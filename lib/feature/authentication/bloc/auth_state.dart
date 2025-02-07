@@ -17,7 +17,7 @@ final class AuthSuccess extends AuthState {
   const AuthSuccess(this.isLoggedIn);
 
   @override
-  List<Object> get props => [isLoggedIn];
+  List<Object?> get props => [isLoggedIn];
 }
 
 final class AuthFailed extends AuthState {

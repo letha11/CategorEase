@@ -4,6 +4,8 @@ import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
+import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
+import 'package:categorease/feature/chat/repository/chat_repository.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:get_it/get_it.dart';
@@ -18,17 +20,16 @@ void initServiceLocator() {
   sl.registerLazySingleton<AuthStorage>(
     () => AuthStorageImpl(),
   );
-
-  sl.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      dioClient: sl(),
+  sl.registerLazySingleton<DioClient>(
+    () => DioClient(
       authStorage: sl(),
       logger: sl(),
     ),
   );
 
-  sl.registerLazySingleton<DioClient>(
-    () => DioClient(
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(
+      dioClient: sl(),
       authStorage: sl(),
       logger: sl(),
     ),
@@ -45,6 +46,12 @@ void initServiceLocator() {
       logger: sl(),
     ),
   );
+  sl.registerLazySingleton<ChatRepository>(
+    () => ChatRepositoryImpl(
+      dioClient: sl(),
+      logger: sl(),
+    ),
+  );
 
   sl.registerFactory(
     () => AuthBloc(
@@ -55,6 +62,12 @@ void initServiceLocator() {
     () => HomeBloc(
       roomRepository: sl(),
       categoryRepository: sl(),
+      authStorage: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => ChatBloc(
+      chatRepository: sl(),
     ),
   );
 }

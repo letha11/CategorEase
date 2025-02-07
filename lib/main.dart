@@ -1,6 +1,7 @@
 import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
+import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -29,9 +30,10 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => AuthBloc(
-              authRepository: sl<AuthRepository>(),
-            ),
+            create: (context) => sl<AuthBloc>(),
+          ),
+          BlocProvider(
+            create: (context) => sl<HomeBloc>()..add(FetchDataHome()),
           ),
         ],
         child: BlocListener<AuthBloc, AuthState>(

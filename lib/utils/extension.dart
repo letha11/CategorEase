@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+extension ScreenSize on BuildContext {
+  double get screenWidth => MediaQuery.of(this).size.width;
+  double get screenHeight => MediaQuery.of(this).size.height;
+}
+
 extension IntMargin on int {
   Widget get widthMargin => SizedBox(width: toDouble());
   Widget get heightMargin => SizedBox(height: toDouble());
@@ -11,6 +16,11 @@ extension IntMargin on int {
       SliverToBoxAdapter(child: SizedBox(width: toDouble()));
   SliverToBoxAdapter get sliverHeightMargin =>
       SliverToBoxAdapter(child: SizedBox(height: toDouble()));
+}
+
+extension IntDuration on int {
+  Duration get seconds => Duration(seconds: this);
+  Duration get milliseconds => Duration(milliseconds: this);
 }
 
 extension DoubleMargin on double {

@@ -70,8 +70,8 @@ class ConsoleOutput extends LogOutput {
     if (kReleaseMode || !Platform.isIOS) {
       event.lines.forEach(debugPrint);
     } else {
-      event.lines.forEach(developer.log);
-      // event.lines.forEach(print);
+      // event.lines.forEach(developer.log);
+      event.lines.forEach(print);
     }
   }
 }

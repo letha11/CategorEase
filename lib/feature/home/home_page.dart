@@ -1,6 +1,4 @@
 import 'package:categorease/config/theme/app_theme.dart';
-import 'package:categorease/core/auth_storage.dart';
-import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/feature/home/widgets/chat_tile.dart';

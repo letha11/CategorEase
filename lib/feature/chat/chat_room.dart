@@ -1,22 +1,56 @@
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/core/auth_storage.dart';
+import 'package:categorease/core/service_locator.dart';
+import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
+import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
+import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
+import 'package:categorease/utils/widgets/error_widget.dart';
+import 'package:categorease/utils/widgets/loading.dart';
 import 'package:categorease/utils/widgets/no_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-class ChatRoom extends StatelessWidget {
-  const ChatRoom({super.key});
+class ChatRoom extends StatefulWidget {
+  const ChatRoom({super.key, required this.roomId});
+
+  final int roomId;
+
+  @override
+  State<ChatRoom> createState() => _ChatRoomState();
+}
+
+class _ChatRoomState extends State<ChatRoom> {
+  late final ChatRoomState cubitState;
+  ChatInitialLoaded? blocState;
+  @override
+  void initState() {
+    super.initState();
+
+    cubitState = context.read<ChatRoomCubit>().state;
+    context.read<ChatBloc>().add(FetchChat(roomId: widget.roomId));
+
+    cubitState.scrollController.addListener(() {
+      if (blocState == null) return;
+
+      if (cubitState.scrollController.position.pixels <=
+          cubitState.scrollController.position.maxScrollExtent - 100) return;
+
+      if (blocState!.nextPageStatus.isLoading) return;
+      context.read<ChatBloc>().add(FetchChatNextPage());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final cubitState = context.read<ChatRoomCubit>().state;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -60,68 +94,109 @@ class ChatRoom extends StatelessWidget {
       body: SizedBox.expand(
         child: Stack(
           children: [
-            if (cubitState.chats.isNotEmpty)
-              BlocBuilder<ChatRoomCubit, ChatRoomState>(
-                  builder: (context, state) {
-                return ListView.builder(
-                  itemCount: state.chats.length,
-                  reverse: true,
-                  itemBuilder: (context, i) {
-                    // FIXME: should change to the authenticated user later
-                    final isSender = state.chats[i].isSender(
-                      'Goofy',
-                    );
-                    final Chat chat = state.chats[i];
-                    return Align(
-                      alignment: isSender
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.height * 0.5 -
-                              (16 * 2),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
+            SizedBox(
+              width: context.screenWidth,
+              height: context.screenHeight,
+              child: CustomScrollView(
+                controller: cubitState.scrollController,
+                reverse: true,
+                slivers: [
+                  BlocBuilder<ChatBloc, ChatState>(
+                    builder: (context, state) {
+                      if (state is ChatInitialLoading || state is ChatInitial) {
+                        return const SliverFillRemaining(
+                          child: Center(child: Loading()),
+                        );
+                      } else if (state is ChatInitialError) {
+                        final message = state.failure?.message;
+                        return SliverFillRemaining(
+                          child: AppErrorWidget(
+                            message:
+                                message ?? 'Something went wrong, try again',
+                          ),
+                        );
+                      }
 
-                          /// The list are reversed.
-                          margin: EdgeInsets.only(
-                            bottom: i == 0 ? 100 : 8,
-                            left: isSender
-                                ? MediaQuery.of(context).size.width * 0.2
-                                : 16,
-                            right: isSender
-                                ? 16
-                                : MediaQuery.of(context).size.width * 0.2,
-                            top: i == (state.chats.length - 1) ? 16 : 8,
+                      if (state is! ChatInitialLoaded) {
+                        return const SliverFillRemaining(
+                          child: AppErrorWidget(
+                            message: 'Something went wrong, try again',
                           ),
-                          decoration: BoxDecoration(
-                            color: isSender
-                                ? AppTheme.secondaryBackground
-                                : AppTheme.primaryInput,
-                            borderRadius: BorderRadius.circular(15),
+                        );
+                      }
+
+                      if (state.chats.data.isEmpty) {
+                        return const SliverFillRemaining(
+                          child: NoData(
+                            message: 'No Message found',
+                            subMessage: 'Try sending a message first',
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (!isSender) // FIXME: only show this on group(room that have greater than 2 user) room
-                                Text(
-                                  chat.sentBy,
-                                  style: AppTheme.textTheme.titleSmall
-                                      ?.copyWith(fontSize: 14),
-                                ),
-                              Text(
-                                // chat.content,
-                                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam, Lorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. NullamLorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam',
-                                style: AppTheme.textTheme.bodyLarge,
+                        );
+                      }
+
+                      blocState = state;
+
+                      return SliverList.builder(
+                        itemCount: state.chats.data.length,
+                        itemBuilder: (context, i) {
+                          // FIXME: should change to the authenticated user later
+                          final homeState =
+                              context.read<HomeBloc>().state as HomeLoaded;
+                          final isSender = state.chats.data[i].isSender(
+                            homeState.authenticatedUser.username,
+                          );
+                          final Chat chat = state.chats.data[i];
+
+                          return Align(
+                            alignment: isSender
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    MediaQuery.of(context).size.height * 0.5 -
+                                        (16 * 2),
                               ),
-                              5.heightMargin,
-                              Builder(builder: (context) {
-                                return Row(
-                                  mainAxisAlignment: isSender
-                                      ? MainAxisAlignment.spaceBetween
-                                      : MainAxisAlignment.end,
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+
+                                /// List are reversed
+                                margin: EdgeInsets.only(
+                                  bottom: i == 0 ? 100 : 8,
+                                  left: isSender
+                                      ? MediaQuery.of(context).size.width * 0.2
+                                      : 16,
+                                  right: isSender
+                                      ? 16
+                                      : MediaQuery.of(context).size.width * 0.2,
+                                  top: i == (state.chats.data.length - 1)
+                                      ? 16
+                                      : 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSender
+                                      ? AppTheme.secondaryBackground
+                                      : AppTheme.primaryInput,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: isSender
+                                      ? CrossAxisAlignment.end
+                                      : CrossAxisAlignment.start,
                                   children: [
+                                    if (!isSender) // FIXME: only show this on group(room that have greater than 2 user) room
+                                      Text(
+                                        chat.sentBy,
+                                        style: AppTheme.textTheme.titleSmall
+                                            ?.copyWith(fontSize: 14),
+                                      ),
+                                    Text(
+                                      chat.content,
+                                      textAlign: TextAlign.right,
+                                      style: AppTheme.textTheme.bodyLarge,
+                                    ),
+                                    5.heightMargin,
                                     Text(
                                       chat.updatedAt.toFormattedString(),
                                       style: AppTheme.textTheme.bodyMedium
@@ -130,31 +205,219 @@ class ChatRoom extends StatelessWidget {
                                             .withOpacity(0.5),
                                       ),
                                     ),
-                                    if (isSender)
-                                      SeenIcon(
-                                        isSeen: true,
-                                      ),
+                                    // Builder(builder: (context) {
+                                    //   return Row(
+                                    //     mainAxisAlignment: isSender
+                                    //         ? MainAxisAlignment.spaceBetween
+                                    //         : MainAxisAlignment.end,
+                                    //     children: [
+                                    //       Text(
+                                    //         chat.updatedAt.toFormattedString(),
+                                    //         style:
+                                    //             AppTheme.textTheme.bodyMedium?.copyWith(
+                                    //           color:
+                                    //               AppTheme.primaryText.withOpacity(0.5),
+                                    //         ),
+                                    //       ),
+                                    //       // if (isSender)
+                                    //       //   SeenIcon(
+                                    //       //     isSeen: true,
+                                    //       //   ),
+                                    //     ],
+                                    //   );
+                                    // }),
                                   ],
-                                );
-                              }),
-                            ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  BlocBuilder<ChatBloc, ChatState>(
+                    builder: (context, state) {
+                      if (state is! ChatInitialLoaded) {
+                        return const SliverToBoxAdapter(
+                          child: SizedBox.shrink(),
+                        );
+                      }
+
+                      if (!state.nextPageStatus.isLoading) {
+                        return const SliverToBoxAdapter(
+                          child: SizedBox.shrink(),
+                        );
+                      }
+
+                      return const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 20, bottom: 8),
+                          child: Center(
+                            child: Loading(),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              })
-            else
-              const NoData(
-                message: 'No Message found',
-                subMessage: 'Try sending a message first',
+                      );
+                    },
+                  ),
+                ],
               ),
+              // child: Column(
+              //   mainAxisSize: MainAxisSize.max,
+              //   children: [
+              //     Expanded(flex: 1, child: Text("henlo/")),
+              //     Expanded(
+              //       flex: 20,
+              //       child: BlocBuilder<ChatBloc, ChatState>(
+              //         builder: (context, state) {
+              //           if (state is ChatInitialLoading ||
+              //               state is ChatInitial) {
+              //             return const Center(child: Loading());
+              //           } else if (state is ChatInitialError) {
+              //             final message = state.failure?.message;
+              //             return AppErrorWidget(
+              //               message:
+              //                   message ?? 'Something went wrong, try again',
+              //             );
+              //           }
+              //
+              //           if (state is! ChatInitialLoaded) {
+              //             return const AppErrorWidget(
+              //               message: 'Something went wrong, try again',
+              //             );
+              //           }
+              //
+              //           if (state.chats.data.isEmpty) {
+              //             return const NoData(
+              //               message: 'No Message found',
+              //               subMessage: 'Try sending a message first',
+              //             );
+              //           }
+              //
+              //           blocState = state;
+              //
+              //           return ListView.builder(
+              //             controller: cubitState.scrollController,
+              //             reverse: true,
+              //             itemCount: state.chats.data.length,
+              //             itemBuilder: (context, i) {
+              //               // FIXME: should change to the authenticated user later
+              //               final homeState =
+              //                   context.read<HomeBloc>().state as HomeLoaded;
+              //               final isSender = state.chats.data[i].isSender(
+              //                 homeState.authenticatedUser.username,
+              //               );
+              //               final Chat chat = state.chats.data[i];
+              //
+              //               return Row(
+              //                 children: [
+              //                   Text(chat.id.toString()),
+              //                   Align(
+              //                     alignment: isSender
+              //                         ? Alignment.centerRight
+              //                         : Alignment.centerLeft,
+              //                     child: ConstrainedBox(
+              //                       constraints: BoxConstraints(
+              //                         maxWidth:
+              //                             MediaQuery.of(context).size.height *
+              //                                     0.5 -
+              //                                 (16 * 2),
+              //                       ),
+              //                       child: Container(
+              //                         padding: const EdgeInsets.all(10),
+              //
+              //                         /// List are reversed
+              //                         margin: EdgeInsets.only(
+              //                           bottom: i == 0 ? 70 : 8,
+              //                           left: isSender
+              //                               ? MediaQuery.of(context)
+              //                                       .size
+              //                                       .width *
+              //                                   0.2
+              //                               : 16,
+              //                           right: isSender
+              //                               ? 16
+              //                               : MediaQuery.of(context)
+              //                                       .size
+              //                                       .width *
+              //                                   0.2,
+              //                           top: i == (state.chats.data.length - 1)
+              //                               ? 16
+              //                               : 8,
+              //                         ),
+              //                         decoration: BoxDecoration(
+              //                           color: isSender
+              //                               ? AppTheme.secondaryBackground
+              //                               : AppTheme.primaryInput,
+              //                           borderRadius: BorderRadius.circular(15),
+              //                         ),
+              //                         child: Column(
+              //                           mainAxisSize: MainAxisSize.min,
+              //                           crossAxisAlignment: isSender
+              //                               ? CrossAxisAlignment.end
+              //                               : CrossAxisAlignment.start,
+              //                           children: [
+              //                             if (!isSender) // FIXME: only show this on group(room that have greater than 2 user) room
+              //                               Text(
+              //                                 chat.sentBy,
+              //                                 style: AppTheme
+              //                                     .textTheme.titleSmall
+              //                                     ?.copyWith(fontSize: 14),
+              //                               ),
+              //                             Text(
+              //                               chat.content,
+              //                               textAlign: TextAlign.right,
+              //                               style: AppTheme.textTheme.bodyLarge,
+              //                             ),
+              //                             5.heightMargin,
+              //                             Text(
+              //                               chat.updatedAt.toFormattedString(),
+              //                               style: AppTheme.textTheme.bodyMedium
+              //                                   ?.copyWith(
+              //                                 color: AppTheme.primaryText
+              //                                     .withOpacity(0.5),
+              //                               ),
+              //                             ),
+              //                             // Builder(builder: (context) {
+              //                             //   return Row(
+              //                             //     mainAxisAlignment: isSender
+              //                             //         ? MainAxisAlignment.spaceBetween
+              //                             //         : MainAxisAlignment.end,
+              //                             //     children: [
+              //                             //       Text(
+              //                             //         chat.updatedAt.toFormattedString(),
+              //                             //         style:
+              //                             //             AppTheme.textTheme.bodyMedium?.copyWith(
+              //                             //           color:
+              //                             //               AppTheme.primaryText.withOpacity(0.5),
+              //                             //         ),
+              //                             //       ),
+              //                             //       // if (isSender)
+              //                             //       //   SeenIcon(
+              //                             //       //     isSeen: true,
+              //                             //       //   ),
+              //                             //     ],
+              //                             //   );
+              //                             // }),
+              //                           ],
+              //                         ),
+              //                       ),
+              //                     ),
+              //                   ),
+              //                 ],
+              //               );
+              //             },
+              //           );
+              //         },
+              //       ),
+              //     ),
+              //   ],
+              // ),
+            ),
             BottomBarButton(
               withWrapper: true,
               child: ConstrainedBox(
                 // height: 100,
-                constraints: BoxConstraints(
+                constraints: const BoxConstraints(
                   maxHeight: 100,
                 ),
                 child: Row(

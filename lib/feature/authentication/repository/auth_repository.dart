@@ -2,6 +2,8 @@ import 'package:categorease/core/app_logger.dart';
 import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/core/failures.dart';
+import 'package:categorease/feature/home/model/user.dart';
+import 'package:categorease/utils/api_response.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
@@ -9,6 +11,7 @@ import 'package:fpdart/fpdart.dart';
 abstract class AuthRepository {
   Future<Either<Failure, bool>> login(String username, String password);
   Future<Either<Failure, bool>> refreshToken(String refreshToken);
+  Future<Either<Failure, ApiResponse<User>>> getAuthenticatedUser();
   Future<Either<Failure, bool>> register(
       String username, String password, String confirmPassword);
   Future<Either<Failure, bool>> logout();
@@ -43,11 +46,9 @@ class AuthRepositoryImpl extends AuthRepository {
         await _authStorage.setAccessToken(data['access_token']);
         await _authStorage.setRefreshToken(data['refresh_token']);
 
-        _logger.info('Login success');
         return right(true);
       }
 
-      _logger.warning('Login failed', response);
       return left(const AuthFailure());
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -129,7 +130,6 @@ class AuthRepositoryImpl extends AuthRepository {
       );
 
       if (response.statusCode != 200) {
-        _logger.warning('Failed refreshing the token', response);
         return left(const Failure());
       }
 
@@ -138,8 +138,34 @@ class AuthRepositoryImpl extends AuthRepository {
       await _authStorage.setAccessToken(data['access_token']);
       await _authStorage.setRefreshToken(data['refresh_token']);
 
-      _logger.info('Success refreshing the token', response);
       return right(true);
+    } on DioException catch (e) {
+      return left(_dioClient.parseError(e));
+    } catch (e, s) {
+      _logger.error('Login error', e, s);
+      return left(Failure(exception: e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ApiResponse<User>>> getAuthenticatedUser() async {
+    try {
+      final response = await _dioClient.dioWithToken.get(
+        '/auth/user',
+      );
+
+      if (response.statusCode != 200) {
+        return left(const Failure());
+      }
+
+      final result = ApiResponse.fromJson(
+        response.data,
+        User.fromJson(response.data['data']),
+      );
+
+      _authStorage.setAuthenticatedUser(result.data!);
+
+      return right(result);
     } on DioException catch (e) {
       return left(_dioClient.parseError(e));
     } catch (e, s) {

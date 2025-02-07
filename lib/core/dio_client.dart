@@ -5,6 +5,7 @@ import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/utils/constants.dart';
 import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class DioClient {
   late final Dio _dio;
@@ -23,6 +24,10 @@ class DioClient {
   }) {
     _dio = dio ?? Dio(_options);
     _dio.interceptors.add(_acceptJsonOnlyInterceptor());
+    _dio.interceptors.add(PrettyDioLogger(
+      compact: true,
+      responseBody: false,
+    ));
     _cancelToken = CancelToken();
     _logger = logger ?? AppLoggerImpl();
     _authStorage = authStorage;

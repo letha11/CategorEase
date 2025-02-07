@@ -37,7 +37,6 @@ class CategoryRepositoryImpl implements CategoryRepository {
       final response = await _dioClient.dioWithToken.get('/category');
 
       if (response.statusCode != 200) {
-        _logger.warning('Failed getting categories');
         return left(const Failure());
       }
 
@@ -48,10 +47,8 @@ class CategoryRepositoryImpl implements CategoryRepository {
         ),
       );
 
-      _logger.info('Success getting categories');
       return right(data);
-    } on DioException catch (e, s) {
-      _logger.warning('Failed getting categories', e, s);
+    } on DioException catch (e) {
       return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Error getting categories', e, s);
@@ -81,14 +78,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
       );
 
       if (response.statusCode != 201) {
-        _logger.warning('Failed creating category');
         return left(const Failure());
       }
 
-      _logger.info('Success creating category');
       return right(true);
-    } on DioException catch (e, s) {
-      _logger.warning('Failed creating category', e, s);
+    } on DioException catch (e) {
       return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Error creating category', e, s);
@@ -113,14 +107,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
       );
 
       if (response.statusCode != 200) {
-        _logger.warning('Failed updating category');
         return left(const Failure());
       }
 
-      _logger.info('Success updating category');
       return right(true);
-    } on DioException catch (e, s) {
-      _logger.warning('Failed updating category', e, s);
+    } on DioException catch (e) {
       return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Error updating category', e, s);
