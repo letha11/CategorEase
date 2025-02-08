@@ -85,7 +85,10 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         final roomId = state.pathParameters['room_id'];
 
-        assert(roomId != null || roomId != '', 'Room id is required');
+        assert(state.extra != null, '`extra` is required');
+        assert(state.extra is ChatRoomArgs, '`extra` must be ChatRoomArgs');
+        assert(roomId != null, 'Room ID path parameter is required');
+        final args = state.extra! as ChatRoomArgs;
 
         return MultiBlocProvider(
           providers: [
@@ -93,14 +96,11 @@ final GoRouter appRouter = GoRouter(
               create: (context) => ChatRoomCubit(),
             ),
             BlocProvider<ChatBloc>(
-              create: (context) => sl<ChatBloc>(),
-              // ..add(
-              //   FetchChat(roomId: int.tryParse(roomId!) ?? 0),
-              // ),
+              create: (context) => sl<ChatBloc>(param1: args),
             ),
           ],
           child: ChatRoom(
-            roomId: int.parse(roomId!),
+            roomId: args.roomId,
           ),
         );
       },

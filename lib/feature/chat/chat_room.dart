@@ -7,13 +7,26 @@ import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
+import 'package:categorease/utils/websocket_helper.dart';
 import 'package:categorease/utils/widgets/error_widget.dart';
 import 'package:categorease/utils/widgets/loading.dart';
 import 'package:categorease/utils/widgets/no_data.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:collection/collection.dart';
+
+class ChatRoomArgs extends Equatable {
+  final WebsocketModel websocketModel;
+  final int roomId;
+
+  const ChatRoomArgs({required this.websocketModel, required this.roomId});
+
+  @override
+  List<Object?> get props => [websocketModel, roomId];
+}
 
 class ChatRoom extends StatefulWidget {
   const ChatRoom({super.key, required this.roomId});
@@ -25,8 +38,10 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> {
+  final TextEditingController messageController = TextEditingController();
   late final ChatRoomState cubitState;
   ChatInitialLoaded? blocState;
+
   @override
   void initState() {
     super.initState();
@@ -51,38 +66,65 @@ class _ChatRoomState extends State<ChatRoom> {
       appBar: AppBar(
         title: Row(
           children: [
-            Material(
-              shape: const CircleBorder(),
-              clipBehavior: Clip.antiAlias,
-              color: Colors.transparent,
-              child: Ink.image(
-                image: const NetworkImage(
-                    'https://i.scdn.co/image/ab67616d00001e028c6d178bff293a896f8e38e5'),
-                width: 50,
-                height: 50,
-                child: InkWell(
-                  onTap: () => _showProfileDialog(context),
-                ),
-              ),
+            BlocBuilder<ChatBloc, ChatState>(
+              builder: (context, state) {
+                if (state is! ChatInitialLoaded) {
+                  return const CircleAvatar(
+                    radius: 50,
+                  );
+                }
+                return Material(
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.antiAlias,
+                  color: Colors.transparent,
+                  child: Ink.image(
+                    image: AssetImage(
+                      state.roomDetail.participants.length == 2
+                          ? Assets.images.singleDefault.path
+                          : Assets.images.groupDefaultPng.path,
+                    ),
+                    width: 50,
+                    height: 50,
+                    child: InkWell(
+                      onTap: () => _showProfileDialog(context),
+                    ),
+                  ),
+                );
+              },
             ),
             10.widthMargin,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Goofy',
-                  style: AppTheme.textTheme.titleSmall,
-                ),
-                4.heightMargin,
-                const CategoryChip(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 2.5,
-                  ),
-                  category: 'Work',
-                ),
-              ],
+            BlocBuilder<ChatBloc, ChatState>(
+              builder: (context, state) {
+                if (state is! ChatInitialLoaded) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.roomDetail.name,
+                      style: AppTheme.textTheme.titleSmall,
+                    ),
+                    4.heightMargin,
+                    Row(
+                      children: state.roomDetail.categories
+                          .mapIndexed<Widget>(
+                            (i, category) => Padding(
+                              padding: EdgeInsets.only(left: i == 0 ? 0 : 6.0),
+                              child: CategoryChip(
+                                backgroundColor: category.hexColor.toColor(),
+                                category: category.name,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 2.5, horizontal: 10),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),
@@ -260,7 +302,6 @@ class _ChatRoomState extends State<ChatRoom> {
             BottomBarButton(
               withWrapper: true,
               child: ConstrainedBox(
-                // height: 100,
                 constraints: const BoxConstraints(
                   maxHeight: 100,
                 ),
@@ -270,10 +311,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     Expanded(
                       flex: 3,
                       child: TextField(
-                        controller: context
-                            .read<ChatRoomCubit>()
-                            .state
-                            .messageController,
+                        controller: messageController,
                         minLines: 1,
                         maxLines: 3,
                         onChanged: context.read<ChatRoomCubit>().updateMessage,
@@ -291,9 +329,20 @@ class _ChatRoomState extends State<ChatRoom> {
                       return Expanded(
                         flex: 1,
                         child: SizedBox(
-                          // height: double.infinity,
                           child: ElevatedButton(
-                            onPressed: state.message.isNotEmpty ? () {} : null,
+                            onPressed: state.message.isNotEmpty
+                                ? () {
+                                    final val = state.message;
+                                    messageController.clear();
+                                    context
+                                        .read<ChatRoomCubit>()
+                                        .cleanMessageController();
+
+                                    context
+                                        .read<ChatBloc>()
+                                        .add(SendChatMessage(message: val));
+                                  }
+                                : null,
                             child: const Text('Send'),
                           ),
                         ),

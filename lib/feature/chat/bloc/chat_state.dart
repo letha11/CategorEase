@@ -24,9 +24,11 @@ class ChatInitialLoaded extends ChatState {
   final NextPageStatus nextPageStatus;
   final Failure? nextPageFailure;
   final PaginationApiResponse<Chat> chats;
+  final Room roomDetail;
 
   ChatInitialLoaded({
     required this.chats,
+    required this.roomDetail,
     this.nextPageStatus = NextPageStatus.initial,
     this.nextPageFailure,
   });
@@ -35,9 +37,11 @@ class ChatInitialLoaded extends ChatState {
     NextPageStatus? nextPageStatus,
     Failure? nextPageFailure,
     PaginationApiResponse<Chat>? chats,
+    Room? roomDetail,
   }) {
     return ChatInitialLoaded(
       chats: chats ?? this.chats,
+      roomDetail: roomDetail ?? this.roomDetail,
       nextPageStatus: nextPageStatus ?? this.nextPageStatus,
       nextPageFailure: nextPageFailure ?? this.nextPageFailure,
     );
@@ -48,6 +52,7 @@ class ChatInitialLoaded extends ChatState {
         nextPageStatus,
         nextPageFailure,
         chats,
+        roomDetail,
       ];
 }
 

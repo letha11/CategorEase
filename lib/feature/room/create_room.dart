@@ -45,7 +45,8 @@ class CreateRoom extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       GoRouter.of(context).popUntil('/home');
-                      GoRouter.of(context).push('/chat-room/1');
+                      // FIXME: should find a way to do this better, or refactor the chat-room routes
+                      // GoRouter.of(context).push('/chat-room/1');
                     },
                     child: Text(
                       'Create Room',

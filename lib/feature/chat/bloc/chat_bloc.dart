@@ -1,9 +1,17 @@
+import 'dart:convert';
+
 import 'package:bloc/bloc.dart';
 import 'package:categorease/core/failures.dart';
+import 'package:categorease/core/service_locator.dart';
+import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
 import 'package:categorease/feature/chat/repository/chat_repository.dart';
+import 'package:categorease/feature/room/model/room.dart';
+import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/utils/api_response.dart';
+import 'package:categorease/utils/websocket_helper.dart';
 import 'package:equatable/equatable.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:meta/meta.dart';
 
 part 'chat_event.dart';
@@ -11,28 +19,76 @@ part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository _chatRepository;
+  final RoomRepository _roomRepository;
+  final WebsocketHelper _websocketHelper;
+  final ChatRoomArgs _args;
   late final int roomId;
 
-  ChatBloc({required ChatRepository chatRepository})
-      : _chatRepository = chatRepository,
+  ChatBloc({
+    required ChatRepository chatRepository,
+    required RoomRepository roomRepository,
+    required WebsocketHelper websocketHelper,
+    required ChatRoomArgs args,
+  })  : _chatRepository = chatRepository,
+        _roomRepository = roomRepository,
+        _websocketHelper = websocketHelper,
+        _args = args,
         super(ChatInitial()) {
+    _args.websocketModel.broadcastStream.listen((data) {
+      if (data is! String) return;
+      if (state is! ChatInitialLoaded) return;
+      final loadedState = state as ChatInitialLoaded;
+
+      Map<String, dynamic> parsedData = jsonDecode(data);
+      parsedData
+          .addEntries([MapEntry('id', loadedState.chats.data.first.id + 1)]);
+      add(AddNewChat.AddNewChat(
+        chat: Chat.fromJson(parsedData),
+      ));
+    });
+
     on<FetchChat>(_onFetchChat);
     on<FetchChatNextPage>(_onFetchChatNextPage);
+    on<SendChatMessage>((event, emit) {
+      WebsocketHelper.sendMessage(_args.websocketModel, event.message);
+    });
+    on<AddNewChat>((event, emit) {
+      if (state is! ChatInitialLoaded) return;
+      final loadedState = state as ChatInitialLoaded;
+      emit(loadedState.copyWith(
+        chats: loadedState.chats.copyWith(
+          data: loadedState.chats.data
+            ..insert(
+              0,
+              event.chat,
+            ),
+        ),
+      ));
+    });
   }
 
   _onFetchChat(FetchChat event, Emitter<ChatState> emit) async {
     emit(ChatInitialLoading());
+    late final PaginationApiResponse<Chat> chats;
     roomId = event.roomId;
 
     final result = await _chatRepository.getAllbyRoom(roomId);
 
     result.fold(
       (l) => emit(ChatInitialError(l)),
+      (r) => chats = r,
+    );
+
+    if (state is ChatInitialError) return;
+
+    final roomResult = await _roomRepository.getById(roomId);
+
+    roomResult.fold(
+      (l) => emit(ChatInitialError(l)),
       (r) => emit(
         ChatInitialLoaded(
-          chats: r.copyWith(
-            data: r.data,
-          ),
+          chats: chats,
+          roomDetail: r.data!,
           nextPageStatus: NextPageStatus.initial,
         ),
       ),

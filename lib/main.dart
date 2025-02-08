@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
             create: (context) => sl<AuthBloc>(),
           ),
           BlocProvider(
-            create: (context) => sl<HomeBloc>()..add(FetchDataHome()),
+            create: (context) => sl<HomeBloc>(),
           ),
         ],
         child: BlocListener<AuthBloc, AuthState>(

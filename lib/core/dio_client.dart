@@ -26,7 +26,7 @@ class DioClient {
     _dio.interceptors.add(_acceptJsonOnlyInterceptor());
     _dio.interceptors.add(PrettyDioLogger(
       compact: true,
-      responseBody: false,
+      responseBody: true,
     ));
     _cancelToken = CancelToken();
     _logger = logger ?? AppLoggerImpl();

@@ -53,7 +53,7 @@ class ChooseCategory extends StatelessWidget {
                     .map((e) => e.matchedLocation)
                     .toList();
 
-                if (pathRoutes.contains('/chat-room/1')) {
+                if (pathRoutes.contains('/chat-room')) {
                   GoRouter.of(context).pop();
                 } else {
                   GoRouter.of(context).go('/home');

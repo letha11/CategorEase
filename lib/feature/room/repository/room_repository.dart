@@ -9,6 +9,7 @@ import 'package:fpdart/fpdart.dart';
 abstract class RoomRepository {
   Future<Either<Failure, PaginationApiResponse<Room>>> getAllAssociated(
       {List<int>? categoriesId});
+  Future<Either<Failure, ApiResponse<Room>>> getById(int id);
   Future<Either<Failure, bool>> create({
     required String roomName,
     required List<int> usersId,
@@ -151,6 +152,29 @@ class RoomRepositoryImpl implements RoomRepository {
       return left(_dioClient.parseError(e));
     } catch (e, s) {
       _logger.error('Error updating room', e, s);
+      return left(Failure(exception: e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ApiResponse<Room>>> getById(int id) async {
+    try {
+      final response = await _dioClient.dioWithToken.get('/room/$id');
+
+      if (response.statusCode != 200) {
+        return left(const Failure());
+      }
+
+      return right(
+        ApiResponse.fromJson(
+          response.data,
+          Room.fromJson(response.data['data']),
+        ),
+      );
+    } on DioException catch (e) {
+      return left(_dioClient.parseError(e));
+    } catch (e, s) {
+      _logger.error('Error getting room by id', e, s);
       return left(Failure(exception: e));
     }
   }

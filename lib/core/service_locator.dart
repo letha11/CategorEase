@@ -5,9 +5,11 @@ import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
 import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
+import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/repository/chat_repository.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
+import 'package:categorease/utils/websocket_helper.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt sl = GetIt.instance;
@@ -15,6 +17,9 @@ final GetIt sl = GetIt.instance;
 void initServiceLocator() {
   sl.registerLazySingleton<AppLogger>(
     () => AppLoggerImpl(),
+  );
+  sl.registerLazySingleton<WebsocketHelper>(
+    () => WebsocketHelper(),
   );
 
   sl.registerLazySingleton<AuthStorage>(
@@ -62,12 +67,16 @@ void initServiceLocator() {
     () => HomeBloc(
       roomRepository: sl(),
       categoryRepository: sl(),
+      websocketHelper: sl(),
       authStorage: sl(),
     ),
   );
-  sl.registerFactory(
-    () => ChatBloc(
+  sl.registerFactoryParam<ChatBloc, ChatRoomArgs, void>(
+    (args, _) => ChatBloc(
+      args: args,
       chatRepository: sl(),
+      roomRepository: sl(),
+      websocketHelper: sl(),
     ),
   );
 }

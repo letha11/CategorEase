@@ -5,14 +5,15 @@ part 'chat.g.dart';
 
 @JsonSerializable()
 class Chat extends Equatable {
-  final int id;
-  final String sentBy;
-  final String content;
-  final ChatType type;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  late final int id;
+  late final String sentBy;
+  late final String content;
+  late final ChatType type;
+  late final DateTime createdAt;
+  late final DateTime updatedAt;
 
-  const Chat({
+  // ignore: prefer_const_constructors_in_immutables
+  Chat({
     required this.id,
     required this.sentBy,
     required this.content,
@@ -20,6 +21,16 @@ class Chat extends Equatable {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  Chat.message({
+    required this.content,
+  }) {
+    id = 0;
+    sentBy = '';
+    type = ChatType.text;
+    createdAt = DateTime.now();
+    updatedAt = DateTime.now();
+  }
 
   factory Chat.fromJson(Map<String, dynamic> json) => _$ChatFromJson(json);
 

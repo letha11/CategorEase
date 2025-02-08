@@ -1,4 +1,5 @@
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/feature/home/widgets/chat_tile.dart';
@@ -14,8 +15,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<HomeBloc>().add(FetchDataHome());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +39,7 @@ class HomePage extends StatelessWidget {
             icon: SvgPicture.asset(
               Assets.icons.setting,
             ),
-            onPressed: () {
+            onPressed: () async {
               GoRouter.of(context).push('/setting');
             },
           ),
@@ -167,7 +179,13 @@ class HomePage extends StatelessWidget {
                       (context, index) {
                         final Room room = state.rooms![index];
                         return ChatTile(
-                          onTap: () => context.push('/chat-room/${room.id}'),
+                          onTap: () => context.push(
+                            '/chat-room/${room.id}',
+                            extra: ChatRoomArgs(
+                              websocketModel: state.websocketModels![index],
+                              roomId: room.id,
+                            ),
+                          ),
                           roomName: room.name,
 
                           // FIXME: 2 participants mean that 1 to 1 conversation so change the image.

@@ -10,3 +10,15 @@ class FetchChat extends ChatEvent {
 }
 
 class FetchChatNextPage extends ChatEvent {}
+
+class AddNewChat extends ChatEvent {
+  final Chat chat;
+
+  AddNewChat({required this.chat});
+}
+
+class SendChatMessage extends ChatEvent {
+  final String message;
+
+  SendChatMessage({required this.message});
+}
