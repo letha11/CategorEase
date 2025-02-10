@@ -33,6 +33,10 @@ extension DoubleMargin on double {
       SliverToBoxAdapter(child: SizedBox(height: this));
 }
 
+extension StringHex on Color {
+  String get toHex => value.toRadixString(16).substring(2);
+}
+
 extension HexColor on String {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
   Color toColor() {

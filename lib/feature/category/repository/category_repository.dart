@@ -10,7 +10,7 @@ abstract class CategoryRepository {
   Future<Either<Failure, ApiResponse<List<Category>>>> getAllAssociated();
   Future<Either<Failure, bool>> create({
     required String name,
-    required List<int> roomsId,
+    required List<int> roomIds,
     String hexColor,
   });
   Future<Either<Failure, bool>> update({
@@ -59,13 +59,13 @@ class CategoryRepositoryImpl implements CategoryRepository {
   @override
   Future<Either<Failure, bool>> create({
     required String name,
-    required List<int> roomsId,
+    required List<int> roomIds,
     String? hexColor,
   }) async {
     try {
       Map<String, dynamic> data = {
         'name': name,
-        'rooms': roomsId,
+        'rooms': roomIds.join(','),
       };
 
       if (hexColor != null) {
@@ -73,7 +73,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
       }
 
       final response = await _dioClient.dioWithToken.post(
-        '/category',
+        '/category/',
         data: FormData.fromMap(data),
       );
 

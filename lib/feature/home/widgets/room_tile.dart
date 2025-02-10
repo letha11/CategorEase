@@ -5,25 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-class ChatTile extends StatelessWidget {
-  const ChatTile({
+class RoomTile extends StatelessWidget {
+  const RoomTile({
     super.key,
     required this.imagePath,
     required this.roomName,
-    required this.lastMessage,
+    this.lastMessage,
     required this.unreadCount,
-    required this.onTap,
+    this.onTap,
     this.lastMessageSentAt,
     this.categories,
+    this.containerPadding =
+        const EdgeInsets.only(top: 7, bottom: 7, left: 16, right: 16),
+    this.dividerPadding = const EdgeInsets.symmetric(horizontal: 16),
   });
 
   final String imagePath;
   final String roomName;
-  final String lastMessage;
+  final String? lastMessage;
   final DateTime? lastMessageSentAt;
   final int unreadCount;
   final List<Widget>? categories;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final EdgeInsetsGeometry containerPadding;
+  final EdgeInsetsGeometry dividerPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +38,7 @@ class ChatTile extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: Container(
-            padding:
-                const EdgeInsets.only(top: 7, bottom: 7, left: 16, right: 16),
+            padding: containerPadding,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -85,53 +89,55 @@ class ChatTile extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Text(
-                              lastMessage,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTheme.textTheme.bodyLarge?.copyWith(
-                                color: unreadCount == 0
-                                    ? AppTheme.primaryText.withOpacity(0.5)
-                                    : null,
+                            if (lastMessage != null)
+                              Text(
+                                lastMessage!,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTheme.textTheme.bodyLarge?.copyWith(
+                                  color: unreadCount == 0
+                                      ? AppTheme.primaryText.withOpacity(0.5)
+                                      : null,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      lastMessageSentAt?.toHourFormattedString() ?? '.. : ..',
-                      style: AppTheme.textTheme.bodyMedium?.copyWith(
-                        color: AppTheme.primaryText.withOpacity(0.5),
-                      ),
-                    ),
-                    if (unreadCount != 0)
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(10, 10, 11, 10),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppTheme.activeColor,
-                        ),
-                        child: Text(
-                          unreadCount.toString(),
-                          style: AppTheme.textTheme.bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                if (lastMessageSentAt != null)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        lastMessageSentAt?.toHourFormattedString() ?? '.. : ..',
+                        style: AppTheme.textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.primaryText.withOpacity(0.5),
                         ),
                       ),
-                  ],
-                ),
+                      if (unreadCount != 0)
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(10, 10, 11, 10),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppTheme.activeColor,
+                          ),
+                          child: Text(
+                            unreadCount.toString(),
+                            style: AppTheme.textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                    ],
+                  ),
               ],
             ),
           ),
         ),
         7.heightMargin,
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Divider(
+        Padding(
+          padding: dividerPadding,
+          child: const Divider(
             height: 1,
             color: AppTheme.primaryDivider,
           ),

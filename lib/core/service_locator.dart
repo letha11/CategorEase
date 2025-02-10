@@ -3,6 +3,7 @@ import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
+import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
 import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
@@ -84,6 +85,11 @@ void initServiceLocator() {
       args: args,
       chatRepository: sl(),
       roomRepository: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => CreateCategoryBloc(
+      categoryRepository: sl(),
     ),
   );
 }

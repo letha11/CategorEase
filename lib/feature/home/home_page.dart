@@ -1,8 +1,10 @@
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
-import 'package:categorease/feature/home/widgets/chat_tile.dart';
+import 'package:categorease/feature/home/widgets/room_tile.dart';
+import 'package:categorease/feature/room/create_room.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
@@ -60,8 +62,17 @@ class _HomePageState extends State<HomePage> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 16.0),
                       child: CategoryChip(
-                        onTap: () =>
-                            GoRouter.of(context).push('/create-category'),
+                        onTap: () async {
+                          dynamic shouldRefresh =
+                              await GoRouter.of(context).push(
+                            '/create-category',
+                            extra: CreateCategoryArgs(rooms: state.rooms ?? []),
+                          );
+
+                          if (shouldRefresh is bool && shouldRefresh) {
+                            context.read<HomeBloc>().add(FetchDataHome());
+                          }
+                        },
                         backgroundColor: AppTheme.primaryButton,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 3,
@@ -83,12 +94,25 @@ class _HomePageState extends State<HomePage> {
                             state.categories!.length + 1, // for '+' button
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, i) {
+                          /// Add button
                           if (i == state.categories!.length) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16.0),
                               child: CategoryChip(
-                                onTap: () => GoRouter.of(context)
-                                    .push('/create-category'),
+                                onTap: () async {
+                                  dynamic shouldRefresh =
+                                      await GoRouter.of(context).push(
+                                    '/create-category',
+                                    extra: CreateCategoryArgs(
+                                        rooms: state.rooms ?? []),
+                                  );
+
+                                  if (shouldRefresh is bool && shouldRefresh) {
+                                    context
+                                        .read<HomeBloc>()
+                                        .add(FetchDataHome());
+                                  }
+                                },
                                 backgroundColor: AppTheme.primaryButton,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 3,
@@ -178,7 +202,7 @@ class _HomePageState extends State<HomePage> {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final Room room = state.rooms![index];
-                        return ChatTile(
+                        return RoomTile(
                           onTap: () async {
                             context
                                 .read<HomeBloc>()

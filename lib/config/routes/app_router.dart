@@ -1,6 +1,7 @@
 import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
+import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
 import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
@@ -74,10 +75,26 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/create-category',
-      builder: (context, state) => BlocProvider<CreateCategoryCubit>(
-        create: (context) => CreateCategoryCubit(),
-        child: CreateCategory(),
-      ),
+      builder: (context, state) {
+        assert(state.extra != null, '`extra` is required');
+        assert(state.extra is CreateCategoryArgs,
+            '`extra` must be CreateCategoryArgs');
+        final args = state.extra! as CreateCategoryArgs;
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<CreateCategoryCubit>(
+              create: (context) => CreateCategoryCubit(),
+            ),
+            BlocProvider<CreateCategoryBloc>(
+              create: (context) => sl(),
+            ),
+          ],
+          child: CreateCategory(
+            rooms: args.rooms,
+          ),
+        );
+      },
     ),
     GoRoute(
       path: '/chat-room/:room_id',
