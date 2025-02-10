@@ -62,26 +62,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     List<Category>? currentCategories;
     emit(HomeLoading());
 
-    late final Either<Failure, PaginationApiResponse<Room>> roomResponse;
-    late final Either<Failure, ApiResponse<List<Category>>> categoryResponse;
-    late final User authenticatedUser;
-    await Future.wait([
-      _roomRepository.getAllAssociated().then((val) => roomResponse = val),
-      _categoryRepository
-          .getAllAssociated()
-          .then((val) => categoryResponse = val),
-      _authStorage
-          .getAuthenticatedUser()
-          .then((user) => authenticatedUser = user!),
-    ]);
+    final categoryResponse = await _categoryRepository.getAllAssociated();
 
     categoryResponse.fold(
-      // FIXME: I still don't know on how to tackle this, but currently
-      // I think that the app should care most about the rooms instead of the
-      // categories since, so it's better to show the error in the room list (sorry category)
-      (l) {},
+      (l) => emit(HomeError(l)),
       (r) => currentCategories = r.data,
     );
+
+    if (state is HomeError) return;
+
+    final roomResponse = await _roomRepository.getAllAssociated();
 
     roomResponse.fold(
       (l) {
@@ -90,7 +80,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       (r) => currentRooms = r.data,
     );
 
-    if (state is HomeError) {
+    if (state is HomeError) return;
+
+    final authenticatedUser = await _authStorage.getAuthenticatedUser();
+
+    if (authenticatedUser == null) {
+      emit(HomeError(const UnauthorizedFailure()));
       return;
     }
 

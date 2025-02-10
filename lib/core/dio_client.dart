@@ -14,7 +14,7 @@ class DioClient {
   late final CancelToken _cancelToken;
 
   final _options = BaseOptions(
-    baseUrl: Constants.baseUrlHttp,
+    baseUrl: Constants.getDevBaseUrl(),
   );
 
   DioClient({
@@ -27,6 +27,7 @@ class DioClient {
     _dio.interceptors.add(PrettyDioLogger(
       compact: true,
       responseBody: true,
+      requestBody: true,
     ));
     _cancelToken = CancelToken();
     _logger = logger ?? AppLoggerImpl();
@@ -140,10 +141,16 @@ class TokenInterceptor extends Interceptor {
       _logger.info('Performing renewing token');
       _retryCount++;
 
-      await Future.delayed(const Duration(seconds: 1));
       await _authRepository.refreshToken(refreshToken);
-      final response = await _getRetryRequest(err);
-      return handler.resolve(response);
+
+      try {
+        final response = await _getRetryRequest(err);
+        return handler.resolve(response);
+      } on DioException catch (e) {
+        return handler.reject(e);
+      } catch (e) {
+        return handler.reject(err);
+      }
     }
     return handler.next(err);
   }
@@ -178,9 +185,16 @@ class TokenInterceptor extends Interceptor {
 
     dioRefresh.interceptors.add(this);
 
+    dynamic data;
+    if (requestOptions.data != null && requestOptions.data is FormData) {
+      data = (requestOptions.data as FormData).clone();
+    } else {
+      data = requestOptions.data;
+    }
+
     final response = await dioRefresh.request(
       requestOptions.path,
-      data: requestOptions.data,
+      data: data,
       queryParameters: requestOptions.queryParameters,
       options: options,
     );
