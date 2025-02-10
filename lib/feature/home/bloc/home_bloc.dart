@@ -6,13 +6,13 @@ import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
+import 'package:categorease/feature/chat/repository/participant_repository.dart';
 import 'package:categorease/feature/home/model/user.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
-import 'package:categorease/utils/api_response.dart';
 import 'package:categorease/utils/websocket_helper.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fpdart/fpdart.dart';
+// ignore: depend_on_referenced_packages
 import 'package:meta/meta.dart';
 
 part 'home_event.dart';
@@ -21,21 +21,52 @@ part 'home_state.dart';
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final RoomRepository _roomRepository;
   final CategoryRepository _categoryRepository;
+  final ParticipantRepository _participantRepository;
   final AuthStorage _authStorage;
   final WebsocketHelper _websocketHelper;
 
   HomeBloc({
     required RoomRepository roomRepository,
     required CategoryRepository categoryRepository,
+    required ParticipantRepository participantRepository,
     required AuthStorage authStorage,
     required WebsocketHelper websocketHelper,
   })  : _roomRepository = roomRepository,
         _categoryRepository = categoryRepository,
+        _participantRepository = participantRepository,
         _websocketHelper = websocketHelper,
         _authStorage = authStorage,
         super(HomeInitial()) {
     on<FetchDataHome>(_onFetchData);
     on<UpdateLastChatRoom>(_onUpdateLastChatRoom);
+    on<UpdateLastViewedRoom>(_onUpdateLastViewedRoom);
+  }
+
+  void _onUpdateLastViewedRoom(
+      UpdateLastViewedRoom event, Emitter<HomeState> emit) async {
+    if (state is! HomeLoaded) return;
+    bool error = false;
+    final currentState = state as HomeLoaded;
+
+    final updatedRooms = currentState.rooms?.map((room) {
+      if (room.id == event.roomId) {
+        return room.copyWith(
+          unreadMessageCount: 0,
+        );
+      }
+      return room;
+    }).toList();
+    emit(currentState.copyWith(rooms: updatedRooms));
+
+    final result = await _participantRepository.updateLastView(event.roomId);
+
+    result.fold(
+      (l) =>
+          error = true, // FIXME: still don't know what to do when error occured
+      (r) {},
+    );
+
+    if (error) return;
   }
 
   void _onUpdateLastChatRoom(
@@ -53,6 +84,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
       return room;
     }).toList();
+
+    updatedRooms!.sort(
+      (a, b) => (b.lastChat?.createdAt ?? DateTime(0)).compareTo(
+        a.lastChat?.createdAt ?? DateTime(0),
+      ),
+    );
 
     emit(currentState.copyWith(rooms: updatedRooms));
   }
@@ -98,7 +135,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       model.broadcastStream.listen((data) {
         if (data is! String) return;
         if (state is! HomeLoaded) return;
-        final loadedState = state as HomeLoaded;
 
         Map<String, dynamic> parsedData = jsonDecode(data);
         parsedData.addEntries([const MapEntry('id', 0)]);

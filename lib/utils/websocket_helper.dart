@@ -29,8 +29,9 @@ class WebsocketHelper {
   WebsocketHelper({AppLogger? logger}) : _logger = logger ?? AppLoggerImpl();
 
   Future<WebSocketChannel> connect(int roomId, String accessToken) async {
+    final baseUrl = Constants.getDevWebsocketUrl();
     WebSocketChannel channel = WebSocketChannel.connect(
-      Uri.parse('ws://${Constants.baseUrl}/ws/$roomId/$accessToken'),
+      Uri.parse('$baseUrl/ws/$roomId/$accessToken'),
     );
 
     // FIXME: better error handling

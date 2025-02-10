@@ -4,6 +4,7 @@ import 'package:categorease/core/failures.dart';
 import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/utils/constants.dart';
+import 'package:categorease/utils/extension.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -26,7 +27,7 @@ class DioClient {
     _dio.interceptors.add(_acceptJsonOnlyInterceptor());
     _dio.interceptors.add(PrettyDioLogger(
       compact: true,
-      responseBody: true,
+      // responseBody: true,
       requestBody: true,
     ));
     _cancelToken = CancelToken();
@@ -141,6 +142,7 @@ class TokenInterceptor extends Interceptor {
       _logger.info('Performing renewing token');
       _retryCount++;
 
+      await Future.delayed(500.milliseconds);
       await _authRepository.refreshToken(refreshToken);
 
       try {

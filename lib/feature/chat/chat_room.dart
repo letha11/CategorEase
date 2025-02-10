@@ -70,7 +70,7 @@ class _ChatRoomState extends State<ChatRoom> {
               builder: (context, state) {
                 if (state is! ChatInitialLoaded) {
                   return const CircleAvatar(
-                    radius: 50,
+                    radius: 25,
                   );
                 }
                 return Material(
@@ -230,7 +230,8 @@ class _ChatRoomState extends State<ChatRoom> {
                                       ),
                                     Text(
                                       chat.content,
-                                      textAlign: TextAlign.right,
+                                      textAlign:
+                                          isSender ? TextAlign.end : null,
                                       style: AppTheme.textTheme.bodyLarge,
                                     ),
                                     5.heightMargin,

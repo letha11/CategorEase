@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:categorease/core/failures.dart';
-import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
 import 'package:categorease/feature/chat/repository/chat_repository.dart';
@@ -11,7 +11,7 @@ import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/utils/api_response.dart';
 import 'package:categorease/utils/websocket_helper.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fpdart/fpdart.dart';
+// ignore: depend_on_referenced_packages
 import 'package:meta/meta.dart';
 
 part 'chat_event.dart';
@@ -20,21 +20,19 @@ part 'chat_state.dart';
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository _chatRepository;
   final RoomRepository _roomRepository;
-  final WebsocketHelper _websocketHelper;
   final ChatRoomArgs _args;
+  late final StreamSubscription _subscription;
   late final int roomId;
 
   ChatBloc({
     required ChatRepository chatRepository,
     required RoomRepository roomRepository,
-    required WebsocketHelper websocketHelper,
     required ChatRoomArgs args,
   })  : _chatRepository = chatRepository,
         _roomRepository = roomRepository,
-        _websocketHelper = websocketHelper,
         _args = args,
         super(ChatInitial()) {
-    _args.websocketModel.broadcastStream.listen((data) {
+    _subscription = _args.websocketModel.broadcastStream.listen((data) {
       if (data is! String) return;
       if (state is! ChatInitialLoaded) return;
       final loadedState = state as ChatInitialLoaded;
@@ -42,7 +40,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       Map<String, dynamic> parsedData = jsonDecode(data);
       parsedData
           .addEntries([MapEntry('id', loadedState.chats.data.first.id + 1)]);
-      add(AddNewChat.AddNewChat(
+
+      add(AddNewChat(
         chat: Chat.fromJson(parsedData),
       ));
     });
@@ -70,6 +69,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   _onFetchChat(FetchChat event, Emitter<ChatState> emit) async {
     emit(ChatInitialLoading());
     late final PaginationApiResponse<Chat> chats;
+    late final Room roomDetail;
     roomId = event.roomId;
 
     final result = await _chatRepository.getAllbyRoom(roomId);
@@ -85,12 +85,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     roomResult.fold(
       (l) => emit(ChatInitialError(l)),
-      (r) => emit(
-        ChatInitialLoaded(
-          chats: chats,
-          roomDetail: r.data!,
-          nextPageStatus: NextPageStatus.initial,
-        ),
+      (r) => roomDetail = r.data!,
+    );
+
+    if (state is ChatInitialError) return;
+
+    emit(
+      ChatInitialLoaded(
+        chats: chats,
+        roomDetail: roomDetail,
+        nextPageStatus: NextPageStatus.initial,
       ),
     );
   }
@@ -132,5 +136,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ),
       ),
     );
+  }
+
+  @override
+  Future<void> close() {
+    _subscription.cancel();
+    return super.close();
   }
 }

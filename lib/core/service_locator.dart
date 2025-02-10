@@ -7,6 +7,7 @@ import 'package:categorease/feature/category/repository/category_repository.dart
 import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/repository/chat_repository.dart';
+import 'package:categorease/feature/chat/repository/participant_repository.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/utils/websocket_helper.dart';
@@ -57,6 +58,12 @@ void initServiceLocator() {
       logger: sl(),
     ),
   );
+  sl.registerLazySingleton<ParticipantRepository>(
+    () => ParticipantRepositoryImpl(
+      dioClient: sl(),
+      logger: sl(),
+    ),
+  );
 
   sl.registerFactory(
     () => AuthBloc(
@@ -65,6 +72,7 @@ void initServiceLocator() {
   );
   sl.registerFactory(
     () => HomeBloc(
+      participantRepository: sl(),
       roomRepository: sl(),
       categoryRepository: sl(),
       websocketHelper: sl(),
@@ -76,7 +84,6 @@ void initServiceLocator() {
       args: args,
       chatRepository: sl(),
       roomRepository: sl(),
-      websocketHelper: sl(),
     ),
   );
 }

@@ -1,4 +1,3 @@
-import 'package:categorease/config/routes/app_router.dart';
 import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/gen/assets.gen.dart';

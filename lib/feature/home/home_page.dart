@@ -179,16 +179,26 @@ class _HomePageState extends State<HomePage> {
                       (context, index) {
                         final Room room = state.rooms![index];
                         return ChatTile(
-                          onTap: () => context.push(
-                            '/chat-room/${room.id}',
-                            extra: ChatRoomArgs(
-                              websocketModel: state.websocketModels![index],
-                              roomId: room.id,
-                            ),
-                          ),
-                          roomName: room.name,
+                          onTap: () async {
+                            context
+                                .read<HomeBloc>()
+                                .add(UpdateLastViewedRoom(roomId: room.id));
 
-                          // FIXME: 2 participants mean that 1 to 1 conversation so change the image.
+                            await context.push(
+                              '/chat-room/${room.id}',
+                              extra: ChatRoomArgs(
+                                websocketModel: state.websocketModels!
+                                    .firstWhere((r) => r.roomId == room.id),
+                                roomId: room.id,
+                              ),
+                            );
+
+                            //update after finish chatting inside of a room
+                            context
+                                .read<HomeBloc>()
+                                .add(UpdateLastViewedRoom(roomId: room.id));
+                          },
+                          roomName: room.name,
                           imagePath: room.participants.length == 2
                               ? Assets.images.singleDefault.path
                               : Assets.images.groupDefaultPng.path,
