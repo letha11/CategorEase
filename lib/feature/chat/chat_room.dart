@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
 import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
@@ -102,52 +104,55 @@ class _ChatRoomState extends State<ChatRoom> {
                   if (state is! ChatInitialLoaded) {
                     return const SizedBox.shrink();
                   }
-
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        state.roomDetail.name,
-                        style: AppTheme.textTheme.titleSmall,
-                      ),
-                      4.heightMargin,
                       SizedBox(
                         height: 25,
-                        child: ListView.builder(
+                        child: ListView(
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, i) {
-                            final category = state.roomDetail.categories[i];
-
-                            return Padding(
-                              padding: EdgeInsets.only(left: i == 0 ? 0 : 6.0),
-                              child: CategoryChip(
-                                backgroundColor: category.hexColor.toColor(),
-                                category: category.name,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 2.5, horizontal: 10),
-                              ),
-                            );
-                          },
-                          itemCount: state.roomDetail.categories.length,
+                          children: [
+                            Text(
+                              state.roomDetail.name,
+                              style: AppTheme.textTheme.titleSmall,
+                            ),
+                            10.widthMargin,
+                            ...(state.roomDetail.categories
+                                .mapIndexed<Widget>(
+                                  (i, category) => Padding(
+                                    padding:
+                                        EdgeInsets.only(left: i == 0 ? 0 : 6.0),
+                                    child: CategoryChip(
+                                      backgroundColor:
+                                          category.hexColor.toColor(),
+                                      category: category.name,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 2.5, horizontal: 10),
+                                    ),
+                                  ),
+                                )
+                                .toList())
+                          ],
                         ),
                       ),
+                      Text(
+                        state.roomDetail.participants.map((e) {
+                          if (e.user.username ==
+                              (context.read<HomeBloc>().state as HomeLoaded)
+                                  .authenticatedUser
+                                  .username) {
+                            return 'You';
+                          }
 
-                      // Row(
-                      //   children: state.roomDetail.categories
-                      //       .mapIndexed<Widget>(
-                      //         (i, category) => Padding(
-                      //           padding: EdgeInsets.only(left: i == 0 ? 0 : 6.0),
-                      //           child: CategoryChip(
-                      //             backgroundColor: category.hexColor.toColor(),
-                      //             category: category.name,
-                      //             padding: const EdgeInsets.symmetric(
-                      //                 vertical: 2.5, horizontal: 10),
-                      //           ),
-                      //         ),
-                      //       )
-                      //       .toList(),
-                      // ),
+                          return e.user.username;
+                        }).join(', '),
+                        style: AppTheme.textTheme.labelMedium?.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: AppTheme.colorScheme.onSurface,
+                        ),
+                      ),
                     ],
                   );
                 },
