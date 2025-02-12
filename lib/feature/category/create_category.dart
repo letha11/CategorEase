@@ -6,6 +6,7 @@ import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
+import 'package:categorease/utils/widgets/error_widget.dart';
 import 'package:categorease/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -314,6 +315,78 @@ class CreateCategory extends StatelessWidget {
               listener: (context, state) {
                 if (state is CreateCategorySuccess) {
                   context.pop(true);
+                } else if (state is CreateCategoryFailed && !state.roomEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 23,
+                          vertical: 30,
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppErrorWidget(
+                              iconColor: AppTheme.errorColor,
+                              message: state.failure.message,
+                              subMessage: 'Please try again.',
+                            ),
+                            20.heightMargin,
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: AppTheme
+                                    .darkTheme.elevatedButtonTheme.style
+                                    ?.copyWith(
+                                  backgroundColor: const WidgetStatePropertyAll(
+                                    AppTheme.errorColor,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  dialogContext.pop();
+                                  context.read<CreateCategoryBloc>().add(
+                                        CreateCategoryCreate(
+                                          name: nameController.text,
+                                          roomIds: context
+                                              .read<CreateCategoryCubit>()
+                                              .state
+                                              .selectedRooms,
+                                          color: context
+                                              .read<CreateCategoryCubit>()
+                                              .state
+                                              .pickedColor
+                                              .toHex,
+                                        ),
+                                      );
+                                },
+                                child: Text(
+                                  'Try again',
+                                  style:
+                                      AppTheme.textTheme.labelMedium?.copyWith(
+                                    color: AppTheme.primaryText,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            10.heightMargin,
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () => context.pop(),
+                                child: const Text(
+                                  'Close',
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  );
                 }
               },
               builder: (context, state) {

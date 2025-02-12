@@ -8,11 +8,13 @@ class AppErrorWidget extends StatelessWidget {
   const AppErrorWidget({
     super.key,
     required this.message,
+    this.iconColor = AppTheme.primaryText,
     this.subMessage,
   });
 
   final String message;
   final String? subMessage;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +26,8 @@ class AppErrorWidget extends StatelessWidget {
             Assets.icons.info,
             width: 64,
             height: 64,
-            colorFilter: const ColorFilter.mode(
-              AppTheme.primaryText,
+            colorFilter: ColorFilter.mode(
+              iconColor,
               BlendMode.srcIn,
             ),
           ),
