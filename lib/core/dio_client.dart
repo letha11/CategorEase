@@ -12,7 +12,7 @@ class DioClient {
   late final Dio _dio;
   late final AuthStorage _authStorage;
   late final AppLogger _logger;
-  late final CancelToken _cancelToken;
+  late CancelToken cancelToken;
 
   final _options = BaseOptions(
     baseUrl: Constants.getDevBaseUrl(),
@@ -30,7 +30,7 @@ class DioClient {
       // responseBody: true,
       requestBody: true,
     ));
-    _cancelToken = CancelToken();
+    cancelToken = CancelToken();
     _logger = logger ?? AppLoggerImpl();
     _authStorage = authStorage;
   }
@@ -41,7 +41,8 @@ class DioClient {
       return;
     }
 
-    _cancelToken.cancel();
+    cancelToken.cancel('Request Cancelled');
+    cancelToken = CancelToken();
   }
 
   InterceptorsWrapper _acceptJsonOnlyInterceptor() =>

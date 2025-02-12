@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
@@ -69,8 +70,8 @@ class ConsoleOutput extends LogOutput {
     if (kReleaseMode || !Platform.isIOS) {
       event.lines.forEach(debugPrint);
     } else {
-      // event.lines.forEach(developer.log);
-      event.lines.forEach(print);
+      event.lines.forEach(developer.log);
+      // event.lines.forEach(print);
     }
   }
 }

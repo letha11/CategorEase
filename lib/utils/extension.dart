@@ -1,3 +1,4 @@
+import 'package:categorease/utils/constants.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -90,4 +91,11 @@ extension GoRouterExt on GoRouter {
       currentRoute = _currentRoute;
     }
   }
+}
+
+extension IsHelper on NextPageStatus {
+  bool get isInitial => this == NextPageStatus.initial;
+  bool get isLoading => this == NextPageStatus.loading;
+  bool get isLoaded => this == NextPageStatus.loaded;
+  bool get isError => this == NextPageStatus.error;
 }

@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class UserTile extends StatelessWidget {
-  const UserTile({super.key});
+  const UserTile({super.key, required this.username});
+
+  final String username;
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +34,13 @@ class UserTile extends StatelessWidget {
                           width: 50,
                           height: 50,
                           child: InkWell(
-                            // onTap: () => _showDialog(context),
                             onTap: () {},
                           ),
                         ),
                       ),
                       10.widthMargin,
                       Text(
-                        'ibkaanhar',
+                        username,
                         style: AppTheme.textTheme.titleSmall,
                       ),
                     ],
@@ -66,14 +67,27 @@ class UserTile extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Create a room with this person ?'),
-          content:
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Create a room with this person ?',
+                style: AppTheme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              15.heightMargin,
               const Text('Are you sure you want to chat with this person?'),
+            ],
+          ),
           actions: [
             Row(
               children: [
                 Expanded(
-                  // width: double.infinity,
                   child: ElevatedButton(
                     style:
                         Theme.of(context).elevatedButtonTheme.style?.copyWith(
@@ -81,8 +95,9 @@ class UserTile extends StatelessWidget {
                               shape: WidgetStatePropertyAll(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  side: BorderSide(
-                                      color: AppTheme.secondaryBackground),
+                                  side: const BorderSide(
+                                    color: AppTheme.secondaryBackground,
+                                  ),
                                 ),
                               ),
                               backgroundColor: const WidgetStatePropertyAll(
@@ -98,9 +113,9 @@ class UserTile extends StatelessWidget {
                 ),
                 8.widthMargin,
                 Expanded(
-                  // width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
+                      context.pop();
                       context.push('/create-room');
                     },
                     child: const Text('Yes'),

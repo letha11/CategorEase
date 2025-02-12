@@ -1,14 +1,5 @@
 part of 'chat_bloc.dart';
 
-enum NextPageStatus { initial, loading, loaded, error }
-
-extension IsHelper on NextPageStatus {
-  bool get isInitial => this == NextPageStatus.initial;
-  bool get isLoading => this == NextPageStatus.loading;
-  bool get isLoaded => this == NextPageStatus.loaded;
-  bool get isError => this == NextPageStatus.error;
-}
-
 @immutable
 abstract class ChatState extends Equatable {
   @override

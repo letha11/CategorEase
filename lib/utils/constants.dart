@@ -34,3 +34,5 @@ class Constants {
     return 'ws://10.0.2.2:5500';
   }
 }
+
+enum NextPageStatus { initial, loading, loaded, error }

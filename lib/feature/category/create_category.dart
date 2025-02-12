@@ -323,9 +323,11 @@ class CreateCategory extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 23,
-                          vertical: 30,
+                        contentPadding: const EdgeInsets.only(
+                          left: 23,
+                          right: 23,
+                          top: 30,
+                          bottom: 20,
                         ),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -335,55 +337,84 @@ class CreateCategory extends StatelessWidget {
                               message: state.failure.message,
                               subMessage: 'Please try again.',
                             ),
-                            20.heightMargin,
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: AppTheme
-                                    .darkTheme.elevatedButtonTheme.style
-                                    ?.copyWith(
-                                  backgroundColor: const WidgetStatePropertyAll(
-                                    AppTheme.errorColor,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  dialogContext.pop();
-                                  context.read<CreateCategoryBloc>().add(
-                                        CreateCategoryCreate(
-                                          name: nameController.text,
-                                          roomIds: context
-                                              .read<CreateCategoryCubit>()
-                                              .state
-                                              .selectedRooms,
-                                          color: context
-                                              .read<CreateCategoryCubit>()
-                                              .state
-                                              .pickedColor
-                                              .toHex,
-                                        ),
-                                      );
-                                },
-                                child: Text(
-                                  'Try again',
-                                  style:
-                                      AppTheme.textTheme.labelMedium?.copyWith(
-                                    color: AppTheme.primaryText,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            10.heightMargin,
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () => context.pop(),
-                                child: const Text(
-                                  'Close',
-                                ),
-                              ),
-                            )
                           ],
                         ),
+                        actions: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: Theme.of(context)
+                                      .elevatedButtonTheme
+                                      .style
+                                      ?.copyWith(
+                                        elevation:
+                                            const WidgetStatePropertyAll(0),
+                                        shape: WidgetStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            side: const BorderSide(
+                                                color: AppTheme
+                                                    .secondaryBackground),
+                                          ),
+                                        ),
+                                        backgroundColor:
+                                            const WidgetStatePropertyAll(
+                                          AppTheme.primaryBackground,
+                                        ),
+                                      ),
+                                  onPressed: () {
+                                    context.pop();
+                                  },
+                                  child: const Text(
+                                    'Close',
+                                    style: TextStyle(
+                                      color: AppTheme.primaryText,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              8.widthMargin,
+                              Expanded(
+                                child: ElevatedButton(
+                                  style: AppTheme
+                                      .darkTheme.elevatedButtonTheme.style
+                                      ?.copyWith(
+                                    backgroundColor:
+                                        const WidgetStatePropertyAll(
+                                      AppTheme.errorColor,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    dialogContext.pop();
+                                    context.read<CreateCategoryBloc>().add(
+                                          CreateCategoryCreate(
+                                            name: nameController.text,
+                                            roomIds: context
+                                                .read<CreateCategoryCubit>()
+                                                .state
+                                                .selectedRooms,
+                                            color: context
+                                                .read<CreateCategoryCubit>()
+                                                .state
+                                                .pickedColor
+                                                .toHex,
+                                          ),
+                                        );
+                                  },
+                                  child: Text(
+                                    'Try again',
+                                    style: AppTheme.textTheme.labelMedium
+                                        ?.copyWith(
+                                      color: AppTheme.primaryText,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       );
                     },
                   );

@@ -11,6 +11,7 @@ import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
 import 'package:categorease/feature/room/create_room.dart';
+import 'package:categorease/feature/search/bloc/search_bloc.dart';
 import 'package:categorease/feature/search/search_page.dart';
 import 'package:categorease/feature/setting/setting_page.dart';
 import 'package:categorease/utils/widgets/splash_page.dart';
@@ -71,7 +72,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/search',
       builder: (BuildContext context, GoRouterState state) =>
-          const SearchPage(),
+          BlocProvider<SearchBloc>(
+        create: (context) => sl(),
+        child: const SearchPage(),
+      ),
     ),
     GoRoute(
       path: '/create-category',

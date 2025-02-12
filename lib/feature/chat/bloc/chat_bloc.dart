@@ -9,6 +9,7 @@ import 'package:categorease/feature/chat/repository/chat_repository.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/utils/api_response.dart';
+import 'package:categorease/utils/constants.dart';
 import 'package:categorease/utils/websocket_helper.dart';
 import 'package:equatable/equatable.dart';
 // ignore: depend_on_referenced_packages
