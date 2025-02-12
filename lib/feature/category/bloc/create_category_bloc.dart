@@ -21,6 +21,16 @@ class CreateCategoryBloc
       CreateCategoryCreate event, Emitter<CreateCategoryBlocState> emit) async {
     emit(CreateCategoryLoading());
 
+    if (event.roomIds.isEmpty) {
+      emit(
+        CreateCategoryFailed(
+          const Failure(message: 'Rooms must be selected at least 1'),
+          roomEmpty: true,
+        ),
+      );
+      return;
+    }
+
     final response = await _categoryRepository.create(
       name: event.name,
       roomIds: event.roomIds,

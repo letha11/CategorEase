@@ -82,6 +82,13 @@ class CreateCategory extends StatelessWidget {
                                       .read<CreateCategoryCubit>()
                                       .updatePreviewText(val);
                                 },
+                                validator: (val) {
+                                  if (val == null || val == '') {
+                                    return 'Category name cannot be empty';
+                                  }
+
+                                  return null;
+                                },
                                 decoration: const InputDecoration(
                                   hintText: 'Category Name',
                                 ),
@@ -144,6 +151,23 @@ class CreateCategory extends StatelessWidget {
                         Text(
                           'Rooms',
                           style: AppTheme.textTheme.titleMedium,
+                        ),
+                        BlocBuilder<CreateCategoryBloc,
+                            CreateCategoryBlocState>(
+                          builder: (context, state) {
+                            if (state is! CreateCategoryFailed) {
+                              return const SizedBox.shrink();
+                            } else if (!state.roomEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Text(
+                              state.failure.message,
+                              style: AppTheme.textTheme.bodySmall?.copyWith(
+                                color: AppTheme.errorColor,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -255,20 +279,24 @@ class CreateCategory extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: state is CreateCategoryLoading
                               ? null
-                              : () => context.read<CreateCategoryBloc>().add(
-                                    CreateCategoryCreate(
-                                      name: nameController.text,
-                                      roomIds: context
-                                          .read<CreateCategoryCubit>()
-                                          .state
-                                          .selectedRooms,
-                                      color: context
-                                          .read<CreateCategoryCubit>()
-                                          .state
-                                          .pickedColor
-                                          .toHex,
-                                    ),
-                                  ),
+                              : () {
+                                  if (!formKey.currentState!.validate()) return;
+
+                                  context.read<CreateCategoryBloc>().add(
+                                        CreateCategoryCreate(
+                                          name: nameController.text,
+                                          roomIds: context
+                                              .read<CreateCategoryCubit>()
+                                              .state
+                                              .selectedRooms,
+                                          color: context
+                                              .read<CreateCategoryCubit>()
+                                              .state
+                                              .pickedColor
+                                              .toHex,
+                                        ),
+                                      );
+                                },
                           child: Text(
                             'Submit',
                             style: AppTheme.textTheme.labelMedium,

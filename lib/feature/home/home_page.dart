@@ -4,7 +4,6 @@ import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/feature/home/widgets/room_tile.dart';
-import 'package:categorease/feature/room/create_room.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';

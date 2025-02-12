@@ -14,6 +14,10 @@ class CreateCategorySuccess extends CreateCategoryBlocState {}
 
 class CreateCategoryFailed extends CreateCategoryBlocState {
   final Failure failure;
+  final bool roomEmpty;
 
-  CreateCategoryFailed(this.failure);
+  CreateCategoryFailed(this.failure, {this.roomEmpty = false});
+
+  @override
+  List<Object?> get props => [failure, roomEmpty];
 }
