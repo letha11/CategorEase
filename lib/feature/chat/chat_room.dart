@@ -66,51 +66,61 @@ class _ChatRoomState extends State<ChatRoom> {
       appBar: AppBar(
         title: Row(
           children: [
-            BlocBuilder<ChatBloc, ChatState>(
-              builder: (context, state) {
-                if (state is! ChatInitialLoaded) {
-                  return const CircleAvatar(
-                    radius: 25,
+            Flexible(
+              flex: 1,
+              child: BlocBuilder<ChatBloc, ChatState>(
+                builder: (context, state) {
+                  if (state is! ChatInitialLoaded) {
+                    return const CircleAvatar(
+                      radius: 25,
+                    );
+                  }
+                  return Material(
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    color: Colors.transparent,
+                    child: Ink.image(
+                      image: AssetImage(
+                        state.roomDetail.participants.length == 2
+                            ? Assets.images.singleDefault.path
+                            : Assets.images.groupDefaultPng.path,
+                      ),
+                      width: 50,
+                      height: 50,
+                      child: InkWell(
+                        onTap: () => _showProfileDialog(context),
+                      ),
+                    ),
                   );
-                }
-                return Material(
-                  shape: const CircleBorder(),
-                  clipBehavior: Clip.antiAlias,
-                  color: Colors.transparent,
-                  child: Ink.image(
-                    image: AssetImage(
-                      state.roomDetail.participants.length == 2
-                          ? Assets.images.singleDefault.path
-                          : Assets.images.groupDefaultPng.path,
-                    ),
-                    width: 50,
-                    height: 50,
-                    child: InkWell(
-                      onTap: () => _showProfileDialog(context),
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
             10.widthMargin,
-            BlocBuilder<ChatBloc, ChatState>(
-              builder: (context, state) {
-                if (state is! ChatInitialLoaded) {
-                  return const SizedBox.shrink();
-                }
+            Expanded(
+              flex: 5,
+              child: BlocBuilder<ChatBloc, ChatState>(
+                builder: (context, state) {
+                  if (state is! ChatInitialLoaded) {
+                    return const SizedBox.shrink();
+                  }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      state.roomDetail.name,
-                      style: AppTheme.textTheme.titleSmall,
-                    ),
-                    4.heightMargin,
-                    Row(
-                      children: state.roomDetail.categories
-                          .mapIndexed<Widget>(
-                            (i, category) => Padding(
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        state.roomDetail.name,
+                        style: AppTheme.textTheme.titleSmall,
+                      ),
+                      4.heightMargin,
+                      SizedBox(
+                        height: 25,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, i) {
+                            final category = state.roomDetail.categories[i];
+
+                            return Padding(
                               padding: EdgeInsets.only(left: i == 0 ? 0 : 6.0),
                               child: CategoryChip(
                                 backgroundColor: category.hexColor.toColor(),
@@ -118,13 +128,31 @@ class _ChatRoomState extends State<ChatRoom> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 2.5, horizontal: 10),
                               ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ],
-                );
-              },
+                            );
+                          },
+                          itemCount: state.roomDetail.categories.length,
+                        ),
+                      ),
+
+                      // Row(
+                      //   children: state.roomDetail.categories
+                      //       .mapIndexed<Widget>(
+                      //         (i, category) => Padding(
+                      //           padding: EdgeInsets.only(left: i == 0 ? 0 : 6.0),
+                      //           child: CategoryChip(
+                      //             backgroundColor: category.hexColor.toColor(),
+                      //             category: category.name,
+                      //             padding: const EdgeInsets.symmetric(
+                      //                 vertical: 2.5, horizontal: 10),
+                      //           ),
+                      //         ),
+                      //       )
+                      //       .toList(),
+                      // ),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),
