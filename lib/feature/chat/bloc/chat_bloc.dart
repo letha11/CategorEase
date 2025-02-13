@@ -38,9 +38,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (state is! ChatInitialLoaded) return;
       final loadedState = state as ChatInitialLoaded;
 
+      final firstId =
+          loadedState.chats.data.isEmpty ? 0 : loadedState.chats.data.first.id;
       Map<String, dynamic> parsedData = jsonDecode(data);
-      parsedData
-          .addEntries([MapEntry('id', loadedState.chats.data.first.id + 1)]);
+      parsedData.addEntries([MapEntry('id', firstId + 1)]);
 
       add(AddNewChat(
         chat: Chat.fromJson(parsedData),
