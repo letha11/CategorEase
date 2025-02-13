@@ -5,6 +5,7 @@ class CategoryChip extends StatelessWidget {
   const CategoryChip({
     super.key,
     required this.backgroundColor,
+    this.active = false,
     this.category,
     this.child,
     this.onTap,
@@ -22,26 +23,36 @@ class CategoryChip extends StatelessWidget {
   final String? category;
   final Widget? child;
   final VoidCallback? onTap;
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(
+          color: active ? AppTheme.primaryText : Colors.transparent,
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: padding,
-          child: Center(
-            child: child != null
-                ? child!
-                : Text(
-                    category!,
-                    style: AppTheme.textTheme.labelSmall?.copyWith(
-                      fontSize: 12,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Padding(
+            padding: padding,
+            child: Center(
+              child: child != null
+                  ? child!
+                  : Text(
+                      category!,
+                      style: AppTheme.textTheme.labelSmall?.copyWith(
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
+            ),
           ),
         ),
       ),

@@ -7,7 +7,8 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract class CategoryRepository {
-  Future<Either<Failure, ApiResponse<List<Category>>>> getAllAssociated();
+  Future<Either<Failure, ApiResponse<List<Category>>>> getAllAssociated(
+      {int? categoryId});
   Future<Either<Failure, bool>> create({
     required String name,
     required List<int> roomIds,
@@ -31,10 +32,18 @@ class CategoryRepositoryImpl implements CategoryRepository {
         _logger = logger ?? AppLoggerImpl();
 
   @override
-  Future<Either<Failure, ApiResponse<List<Category>>>>
-      getAllAssociated() async {
+  Future<Either<Failure, ApiResponse<List<Category>>>> getAllAssociated({
+    int? categoryId,
+  }) async {
     try {
-      final response = await _dioClient.dioWithToken.get('/category');
+      Map<String, dynamic> qp = {};
+
+      if (categoryId != null) {
+        qp['category_id'] = categoryId;
+      }
+
+      final response =
+          await _dioClient.dioWithToken.get('/category', queryParameters: qp);
 
       if (response.statusCode != 200) {
         return left(const Failure());

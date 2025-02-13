@@ -1,12 +1,16 @@
 import 'package:bloc/bloc.dart';
-import 'package:categorease/feature/room/model/room.dart';
 import 'package:equatable/equatable.dart';
 
 part 'home_page_state.dart';
 
 class HomePageCubit extends Cubit<HomePageState> {
-  HomePageCubit()
-      : super(
-          HomePageState(),
-        );
+  HomePageCubit() : super(const HomePageState());
+
+  toggleSelectedCategory(int categoryId) {
+    if (state.selectedCategory == categoryId) {
+      emit(state.copyWith(selectedCategory: 0));
+    } else {
+      emit(state.copyWith(selectedCategory: categoryId));
+    }
+  }
 }

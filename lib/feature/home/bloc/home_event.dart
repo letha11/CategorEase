@@ -5,6 +5,14 @@ abstract class HomeEvent {}
 
 class FetchDataHome extends HomeEvent {}
 
+class FetchDataHomeNext extends HomeEvent {}
+
+class FilterHomeByCategory extends HomeEvent {
+  final int? categoryId;
+
+  FilterHomeByCategory({this.categoryId});
+}
+
 class UpdateLastChatRoom extends HomeEvent {
   final int roomId;
   final Chat lastChat;

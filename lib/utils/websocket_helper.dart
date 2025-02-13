@@ -10,17 +10,36 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class WebsocketModel extends Equatable {
   final int roomId;
   final WebSocketChannel channel;
+  final bool listened;
   late final Stream broadcastStream;
 
   WebsocketModel({
     required this.roomId,
     required this.channel,
+    this.listened = false,
   }) {
     broadcastStream = channel.stream.asBroadcastStream();
   }
 
+  // copywith
+  WebsocketModel copyWith({
+    int? roomId,
+    WebSocketChannel? channel,
+    bool? listened,
+  }) {
+    return WebsocketModel(
+      roomId: roomId ?? this.roomId,
+      channel: channel ?? this.channel,
+      listened: listened ?? this.listened,
+    );
+  }
+
   @override
-  List<Object?> get props => [roomId, channel];
+  List<Object?> get props => [
+        roomId,
+        channel,
+        broadcastStream,
+      ];
 }
 
 class WebsocketHelper {

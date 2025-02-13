@@ -11,30 +11,38 @@ class HomeInitial extends HomeState {}
 class HomeLoading extends HomeState {}
 
 class HomeLoaded extends HomeState {
-  final List<Room>? rooms;
+  final NextPageStatus nextPageStatus;
+  final Failure? nextPageFailure;
+  final PaginationApiResponse<Room> rooms;
   final List<Category>? categories;
   final List<WebsocketModel>? websocketModels;
   final User authenticatedUser;
 
   HomeLoaded({
-    this.rooms,
+    required this.rooms,
     this.categories,
     this.websocketModels,
+    this.nextPageFailure,
+    this.nextPageStatus = NextPageStatus.initial,
     required this.authenticatedUser,
-  }) : assert(rooms == null || websocketModels != null,
-            'Websocket models cannot be null if rooms are not null');
+  }) : assert(rooms.data.isEmpty || websocketModels!.isNotEmpty,
+            'Websocket models cannot be empty if rooms are not empty');
 
   HomeLoaded copyWith({
-    List<Room>? rooms,
+    PaginationApiResponse<Room>? rooms,
     List<Category>? categories,
     List<WebsocketModel>? websocketModels,
     User? authenticatedUser,
+    NextPageStatus? nextPageStatus,
+    Failure? nextPageFailure,
   }) {
     return HomeLoaded(
       rooms: rooms ?? this.rooms,
       websocketModels: websocketModels ?? this.websocketModels,
       categories: categories ?? this.categories,
       authenticatedUser: authenticatedUser ?? this.authenticatedUser,
+      nextPageStatus: nextPageStatus ?? this.nextPageStatus,
+      nextPageFailure: nextPageFailure ?? this.nextPageFailure,
     );
   }
 
@@ -44,6 +52,8 @@ class HomeLoaded extends HomeState {
         categories,
         authenticatedUser,
         websocketModels,
+        nextPageFailure,
+        nextPageStatus,
       ];
 }
 

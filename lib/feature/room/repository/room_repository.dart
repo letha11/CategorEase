@@ -7,8 +7,11 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
 abstract class RoomRepository {
-  Future<Either<Failure, PaginationApiResponse<Room>>> getAllAssociated(
-      {List<int>? categoriesId});
+  Future<Either<Failure, PaginationApiResponse<Room>>> getAllAssociated({
+    int page = 1,
+    int limit = 10,
+    int? categoryId,
+  });
   Future<Either<Failure, ApiResponse<Room>>> getById(int id);
   Future<Either<Failure, bool>> create({
     required String roomName,
@@ -96,10 +99,24 @@ class RoomRepositoryImpl implements RoomRepository {
 
   @override
   Future<Either<Failure, PaginationApiResponse<Room>>> getAllAssociated({
-    List<int>? categoriesId,
+    int page = 1,
+    int limit = 10,
+    int? categoryId,
   }) async {
+    _dioClient.cancelRequests();
+
     try {
-      final response = await _dioClient.dioWithToken.get('/room');
+      Map<String, dynamic> qp = {
+        'page': page,
+        'limit': limit,
+      };
+
+      if (categoryId != null || categoryId != 0) {
+        qp['category_id'] = categoryId;
+      }
+
+      final response =
+          await _dioClient.dioWithToken.get('/room', queryParameters: qp);
 
       if (response.statusCode != 200) {
         return left(const Failure());

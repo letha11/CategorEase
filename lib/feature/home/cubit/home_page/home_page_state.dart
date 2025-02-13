@@ -1,22 +1,20 @@
 part of 'home_page_cubit.dart';
 
 class HomePageState extends Equatable {
-  final List<Room> dummyRooms;
+  final int selectedCategory;
 
-  HomePageState({
-    List<Room>? rooms,
-  }) : dummyRooms = rooms ?? [];
+  const HomePageState({
+    this.selectedCategory = 0,
+  });
 
   HomePageState copyWith({
-    List<Room>? rooms,
+    int? selectedCategory,
   }) {
     return HomePageState(
-      rooms: rooms ?? this.dummyRooms,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
     );
   }
 
   @override
-  List<Object> get props => [
-        dummyRooms,
-      ];
+  List<Object> get props => [selectedCategory];
 }

@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
+import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
 import 'package:categorease/feature/home/widgets/room_tile.dart';
 import 'package:categorease/feature/room/model/room.dart';
@@ -24,10 +27,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final ScrollController _scrollController = ScrollController();
+  late HomeLoaded? homeLoaded;
+
   @override
   void initState() {
     super.initState();
     context.read<HomeBloc>().add(FetchDataHome());
+
+    _scrollController.addListener(() {
+      if (homeLoaded == null) return;
+
+      if (_scrollController.position.pixels <=
+          _scrollController.position.maxScrollExtent - 100) return;
+
+      if (homeLoaded!.nextPageStatus.isLoading) return;
+
+      context.read<HomeBloc>().add(FetchDataHomeNext());
+    });
   }
 
   @override
@@ -48,9 +65,13 @@ class _HomePageState extends State<HomePage> {
       ),
       body: AppRefreshIndicator(
         onRefresh: () async {
+          context.read<HomePageCubit>().toggleSelectedCategory(
+              context.read<HomePageCubit>().state.selectedCategory);
           context.read<HomeBloc>().add(FetchDataHome());
         },
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: BlocBuilder<HomeBloc, HomeState>(
@@ -65,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                           dynamic shouldRefresh =
                               await GoRouter.of(context).push(
                             '/create-category',
-                            extra: CreateCategoryArgs(rooms: state.rooms ?? []),
+                            extra: CreateCategoryArgs(rooms: state.rooms.data),
                           );
 
                           if (shouldRefresh is bool && shouldRefresh) {
@@ -87,7 +108,7 @@ class _HomePageState extends State<HomePage> {
                   return Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: SizedBox(
-                      height: 30,
+                      height: 32,
                       child: ListView.builder(
                         itemCount:
                             state.categories!.length + 1, // for '+' button
@@ -103,7 +124,7 @@ class _HomePageState extends State<HomePage> {
                                       await GoRouter.of(context).push(
                                     '/create-category',
                                     extra: CreateCategoryArgs(
-                                        rooms: state.rooms ?? []),
+                                        rooms: state.rooms.data),
                                   );
 
                                   if (shouldRefresh is bool && shouldRefresh) {
@@ -131,9 +152,38 @@ class _HomePageState extends State<HomePage> {
                               left: i == 0 ? 16 : 0,
                               right: i == (state.categories!.length) ? 16 : 9,
                             ),
-                            child: CategoryChip(
-                              backgroundColor: category.hexColor.toColor(),
-                              category: category.name,
+                            child: BlocBuilder<HomePageCubit, HomePageState>(
+                              builder: (context, cubitState) {
+                                return CategoryChip(
+                                  backgroundColor: category.hexColor.toColor(),
+                                  category: category.name,
+                                  active: context
+                                          .read<HomePageCubit>()
+                                          .state
+                                          .selectedCategory ==
+                                      category.id,
+                                  onTap: () {
+                                    context
+                                        .read<HomePageCubit>()
+                                        .toggleSelectedCategory(category.id);
+
+                                    context.read<HomeBloc>().add(
+                                          FilterHomeByCategory(
+                                            categoryId: context
+                                                        .read<HomePageCubit>()
+                                                        .state
+                                                        .selectedCategory ==
+                                                    0
+                                                ? null
+                                                : context
+                                                    .read<HomePageCubit>()
+                                                    .state
+                                                    .selectedCategory,
+                                          ),
+                                        );
+                                  },
+                                );
+                              },
                             ),
                           );
                         },
@@ -190,17 +240,28 @@ class _HomePageState extends State<HomePage> {
                     subMessage: 'You can refresh by pulling the current page',
                   ));
                 } else if (state is HomeLoaded &&
-                    (state.rooms?.isEmpty ?? false)) {
+                    state.rooms.data.isEmpty &&
+                    !state.nextPageStatus.isLoading) {
+                  homeLoaded = state;
+                  if (homeLoaded != null) {
+                    log("WEBSOCKET_MODEL: ${homeLoaded?.websocketModels}");
+                  }
+
                   return const SliverToBoxAdapter(
                     child: NoData(
                       message: 'No Rooms found',
                     ),
                   );
-                } else if (state is HomeLoaded && state.rooms != null) {
+                } else if (state is HomeLoaded && state.rooms.data.isNotEmpty) {
+                  homeLoaded = state;
+                  if (homeLoaded != null) {
+                    log("WEBSOCKET_MODEL: ${homeLoaded?.websocketModels}");
+                  }
+
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final Room room = state.rooms![index];
+                        final Room room = state.rooms.data[index];
                         return RoomTile(
                           onTap: () async {
                             context
@@ -238,19 +299,59 @@ class _HomePageState extends State<HomePage> {
                                     category: category.name,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 2.5, horizontal: 10),
+                                    onTap: () {
+                                      context
+                                          .read<HomePageCubit>()
+                                          .toggleSelectedCategory(category.id);
+
+                                      context.read<HomeBloc>().add(
+                                            FilterHomeByCategory(
+                                              categoryId: context
+                                                          .read<HomePageCubit>()
+                                                          .state
+                                                          .selectedCategory ==
+                                                      0
+                                                  ? null
+                                                  : context
+                                                      .read<HomePageCubit>()
+                                                      .state
+                                                      .selectedCategory,
+                                            ),
+                                          );
+                                    },
                                   ),
                                 ),
                               )
                               .toList(),
                         );
                       },
-                      childCount: state.rooms!.length,
+                      childCount: state.rooms.data.length,
                     ),
                   );
                 } else {
                   return const SliverToBoxAdapter(child: SizedBox.shrink());
                 }
               },
+            ),
+            SliverToBoxAdapter(
+              child: BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  if (state is! HomeLoaded) {
+                    return const SizedBox.shrink();
+                  }
+
+                  if (!state.nextPageStatus.isLoading) {
+                    return 70.heightMargin;
+                  }
+
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 20, bottom: 70),
+                    child: Center(
+                      child: Loading(),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
