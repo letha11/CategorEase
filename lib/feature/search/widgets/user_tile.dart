@@ -1,5 +1,6 @@
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/gen/assets.gen.dart';
+import 'package:categorease/utils/app_dialog.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -66,64 +67,16 @@ class UserTile extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Create a room with this person ?',
-                style: AppTheme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              15.heightMargin,
-              const Text('Are you sure you want to chat with this person?'),
-            ],
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style:
-                        Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                              elevation: const WidgetStatePropertyAll(0),
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  side: const BorderSide(
-                                    color: AppTheme.secondaryBackground,
-                                  ),
-                                ),
-                              ),
-                              backgroundColor: const WidgetStatePropertyAll(
-                                AppTheme.primaryBackground,
-                              ),
-                            ),
-                    onPressed: () {
-                      context.pop();
-                    },
-                    child: const Text('No',
-                        style: TextStyle(color: AppTheme.primaryText)),
-                  ),
-                ),
-                8.widthMargin,
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      context.pop();
-                      context.push('/create-room');
-                    },
-                    child: const Text('Yes'),
-                  ),
-                ),
-              ],
-            ),
-          ],
+        return ConfirmationDialog(
+          title: 'Create a room with this person ?',
+          subtitle: 'Are you sure you want to chat with this person?',
+          rejectAction: () {
+            context.pop();
+          },
+          confirmAction: () {
+            context.pop();
+            context.push('/create-room');
+          },
         );
       },
     );

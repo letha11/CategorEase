@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+extension IndexExt on int {
+  bool isFirst() => this == 0;
+  bool isLast(List<dynamic> list) => this == list.length - 1;
+}
+
 extension ScreenSize on BuildContext {
   double get screenWidth => MediaQuery.of(this).size.width;
   double get screenHeight => MediaQuery.of(this).size.height;

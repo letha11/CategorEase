@@ -1,3 +1,5 @@
+import 'package:categorease/feature/chat/chat_room_detail.dart';
+import 'package:categorease/feature/room/model/room.dart';
 import 'package:collection/collection.dart';
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/category/model/category.dart';
@@ -41,6 +43,7 @@ class ChatRoom extends StatefulWidget {
 class _ChatRoomState extends State<ChatRoom> {
   final TextEditingController messageController = TextEditingController();
   late final ChatRoomState cubitState;
+  late Room currentRoom;
   ChatInitialLoaded? blocState;
 
   @override
@@ -65,100 +68,114 @@ class _ChatRoomState extends State<ChatRoom> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Flexible(
-              flex: 1,
-              child: BlocBuilder<ChatBloc, ChatState>(
-                builder: (context, state) {
-                  if (state is! ChatInitialLoaded) {
-                    return const CircleAvatar(
-                      radius: 25,
-                    );
-                  }
-                  return Material(
-                    shape: const CircleBorder(),
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.transparent,
-                    child: Ink.image(
-                      image: AssetImage(
-                        state.roomDetail.participants.length == 2
-                            ? Assets.images.singleDefault.path
-                            : Assets.images.groupDefaultPng.path,
-                      ),
-                      width: 50,
-                      height: 50,
-                      child: InkWell(
-                        onTap: () => _showProfileDialog(context),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            10.widthMargin,
-            Expanded(
-              flex: 5,
-              child: BlocBuilder<ChatBloc, ChatState>(
-                builder: (context, state) {
-                  if (state is! ChatInitialLoaded) {
-                    return const SizedBox.shrink();
-                  }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 25,
-                        child: ListView(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            Text(
-                              state.roomDetail.name,
-                              style: AppTheme.textTheme.titleSmall,
-                            ),
-                            10.widthMargin,
-                            ...(state.roomDetail.categories
-                                .mapIndexed<Widget>(
-                                  (i, category) => Padding(
-                                    padding:
-                                        EdgeInsets.only(left: i == 0 ? 0 : 6.0),
-                                    child: CategoryChip(
-                                      backgroundColor:
-                                          category.hexColor.toColor(),
-                                      category: category.name,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 2.5, horizontal: 10),
-                                    ),
-                                  ),
-                                )
-                                .toList())
-                          ],
-                        ),
-                      ),
-                      Text(
-                        state.roomDetail.participants.map((e) {
-                          if (e.user.username ==
-                              (context.read<HomeBloc>().state as HomeLoaded)
-                                  .authenticatedUser
-                                  .username) {
-                            return 'You';
-                          }
+        title: GestureDetector(
+          onTap: () {
+            context.push(
+              '/chat-room-detail',
+              extra: ChatRoomDetailArgs(room: currentRoom),
+            );
+          },
+          child: Container(
+            color: Colors.transparent,
+            child: Row(
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: BlocBuilder<ChatBloc, ChatState>(
+                    builder: (context, state) {
+                      if (state is! ChatInitialLoaded) {
+                        return const CircleAvatar(
+                          radius: 25,
+                        );
+                      }
 
-                          return e.user.username;
-                        }).join(', '),
-                        style: AppTheme.textTheme.labelMedium?.copyWith(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: AppTheme.colorScheme.onSurface,
+                      return Material(
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        color: Colors.transparent,
+                        child: Ink.image(
+                          image: AssetImage(
+                            state.roomDetail.participants.length == 2
+                                ? Assets.images.singleDefault.path
+                                : Assets.images.groupDefaultPng.path,
+                          ),
+                          width: 50,
+                          height: 50,
+                          child: InkWell(
+                            onTap: () => _showProfileDialog(context),
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+                10.widthMargin,
+                Expanded(
+                  flex: 5,
+                  child: BlocBuilder<ChatBloc, ChatState>(
+                    builder: (context, state) {
+                      if (state is! ChatInitialLoaded) {
+                        return const SizedBox.shrink();
+                      }
+                      currentRoom = state.roomDetail;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 25,
+                            child: ListView(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                Text(
+                                  state.roomDetail.name,
+                                  style: AppTheme.textTheme.titleSmall,
+                                ),
+                                10.widthMargin,
+                                ...(state.roomDetail.categories
+                                    .mapIndexed<Widget>(
+                                      (i, category) => Padding(
+                                        padding: EdgeInsets.only(
+                                            left: i == 0 ? 0 : 6.0),
+                                        child: CategoryChip(
+                                          backgroundColor:
+                                              category.hexColor.toColor(),
+                                          category: category.name,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 2.5, horizontal: 10),
+                                        ),
+                                      ),
+                                    )
+                                    .toList())
+                              ],
+                            ),
+                          ),
+                          Text(
+                            state.roomDetail.participants.map((e) {
+                              if (e.user.username ==
+                                  (context.read<HomeBloc>().state as HomeLoaded)
+                                      .authenticatedUser
+                                      .username) {
+                                return 'You';
+                              }
+
+                              return e.user.username;
+                            }).join(', '),
+                            style: AppTheme.textTheme.labelMedium?.copyWith(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: AppTheme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       body: SizedBox.expand(

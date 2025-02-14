@@ -8,6 +8,7 @@ import 'package:categorease/feature/category/cubit/choose_category/choose_catego
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
 import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
+import 'package:categorease/feature/chat/chat_room_detail.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
 import 'package:categorease/feature/room/create_room.dart';
@@ -119,10 +120,22 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
+        path: '/chat-room-detail',
+        builder: (context, state) {
+          assert(state.extra != null, '`extra` is required');
+          assert(state.extra is ChatRoomDetailArgs,
+              '`extra` must be ChatRoomDetail');
+          final args = state.extra! as ChatRoomDetailArgs;
+
+          return ChatRoomDetail(
+            room: args.room,
+          );
+        }),
+    GoRoute(
       path: '/create-room',
       builder: (BuildContext context, GoRouterState state) {
         return const CreateRoom();
       },
-    )
+    ),
   ],
 );

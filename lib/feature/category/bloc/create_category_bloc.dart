@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
 import 'package:categorease/feature/room/model/room.dart';

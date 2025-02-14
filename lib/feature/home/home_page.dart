@@ -244,9 +244,6 @@ class _HomePageState extends State<HomePage> {
                     state.rooms.data.isEmpty &&
                     !state.nextPageStatus.isLoading) {
                   homeLoaded = state;
-                  if (homeLoaded != null) {
-                    log("WEBSOCKET_MODEL: ${homeLoaded?.websocketModels}");
-                  }
 
                   return const SliverToBoxAdapter(
                     child: NoData(
@@ -255,9 +252,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 } else if (state is HomeLoaded && state.rooms.data.isNotEmpty) {
                   homeLoaded = state;
-                  if (homeLoaded != null) {
-                    log("WEBSOCKET_MODEL: ${homeLoaded?.websocketModels}");
-                  }
 
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
