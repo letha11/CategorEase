@@ -78,28 +78,33 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, state) {
                   if (state is! HomeLoaded) {
                     return const SizedBox.shrink();
-                  } else if (state.categories == null) {
+                  } else if (state.categories == null ||
+                      (state.categories?.isEmpty ?? false)) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: CategoryChip(
-                        onTap: () async {
-                          dynamic shouldRefresh =
-                              await GoRouter.of(context).push(
-                            '/create-category',
-                            extra: CreateCategoryArgs(rooms: state.rooms.data),
-                          );
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: CategoryChip(
+                          onTap: () async {
+                            dynamic shouldRefresh =
+                                await GoRouter.of(context).push(
+                              '/create-category',
+                              extra:
+                                  CreateCategoryArgs(rooms: state.rooms.data),
+                            );
 
-                          if (shouldRefresh is bool && shouldRefresh) {
-                            context.read<HomeBloc>().add(FetchDataHome());
-                          }
-                        },
-                        backgroundColor: AppTheme.primaryButton,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 3,
-                          vertical: 2.5,
-                        ),
-                        child: SvgPicture.asset(
-                          Assets.icons.add,
+                            if (shouldRefresh is bool && shouldRefresh) {
+                              context.read<HomeBloc>().add(FetchDataHome());
+                            }
+                          },
+                          backgroundColor: AppTheme.primaryButton,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 3,
+                            vertical: 2.5,
+                          ),
+                          child: SvgPicture.asset(
+                            Assets.icons.add,
+                          ),
                         ),
                       ),
                     );

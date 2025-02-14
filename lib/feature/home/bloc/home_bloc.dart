@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
 import 'package:categorease/core/auth_storage.dart';
-import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
@@ -13,7 +12,6 @@ import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/utils/api_response.dart';
 import 'package:categorease/utils/constants.dart';
-import 'package:categorease/utils/extension.dart';
 import 'package:categorease/utils/websocket_helper.dart';
 import 'package:equatable/equatable.dart';
 // ignore: depend_on_referenced_packages
