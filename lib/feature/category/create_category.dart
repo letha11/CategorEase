@@ -195,38 +195,48 @@ class CreateCategory extends StatelessWidget {
                                         5, 12.5, 5, 12.5),
                                     child: Row(
                                       children: [
-                                        Container(
-                                          width: 20,
-                                          height: 20,
-                                          padding: const EdgeInsets.all(1),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: AppTheme.primaryInput,
-                                              width: 1,
+                                        Flexible(
+                                          flex: 1,
+                                          child: Container(
+                                            width: 20,
+                                            height: 20,
+                                            padding: const EdgeInsets.all(1),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: AppTheme.primaryInput,
+                                                width: 1,
+                                              ),
+                                              shape: BoxShape.circle,
                                             ),
-                                            shape: BoxShape.circle,
+                                            child: state.selectedRooms
+                                                    .contains(room.id)
+                                                ? Container(
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color:
+                                                          AppTheme.activeColor,
+                                                    ),
+                                                  )
+                                                : const SizedBox.shrink(),
                                           ),
-                                          child: state.selectedRooms
-                                                  .contains(room.id)
-                                              ? Container(
-                                                  decoration:
-                                                      const BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: AppTheme.activeColor,
-                                                  ),
-                                                )
-                                              : const SizedBox.shrink(),
                                         ),
                                         10.widthMargin,
-                                        Row(
-                                          children: [
-                                            Material(
-                                              shape: const CircleBorder(),
-                                              clipBehavior: Clip.antiAlias,
-                                              color: Colors.transparent,
-                                              child: Ink.image(
-                                                image: AssetImage(
-                                                    room.participants.length > 2
+                                        Flexible(
+                                          flex: 5,
+                                          child: Row(
+                                            children: [
+                                              Flexible(
+                                                flex: 1,
+                                                child: Material(
+                                                  shape: const CircleBorder(),
+                                                  clipBehavior: Clip.antiAlias,
+                                                  color: Colors.transparent,
+                                                  child: Ink.image(
+                                                    image: AssetImage(room
+                                                                .participants
+                                                                .length >
+                                                            2
                                                         ? Assets
                                                             .images
                                                             .groupDefaultPng
@@ -235,17 +245,25 @@ class CreateCategory extends StatelessWidget {
                                                             .images
                                                             .singleDefault
                                                             .path),
-                                                width: 50,
-                                                height: 50,
+                                                    width: 50,
+                                                    height: 50,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                            10.widthMargin,
-                                            Text(
-                                              room.name,
-                                              style:
-                                                  AppTheme.textTheme.titleSmall,
-                                            ),
-                                          ],
+                                              10.widthMargin,
+                                              Expanded(
+                                                flex: 5,
+                                                child: Text(
+                                                  room.name,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: AppTheme
+                                                      .textTheme.titleSmall,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
