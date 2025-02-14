@@ -6,7 +6,8 @@ import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
-import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
+import 'package:categorease/feature/chat/bloc/chat_room/chat_bloc.dart';
+import 'package:categorease/feature/chat/bloc/chat_room_detail/bloc/chat_room_detail_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/chat_room_detail.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
@@ -127,8 +128,9 @@ final GoRouter appRouter = GoRouter(
               '`extra` must be ChatRoomDetail');
           final args = state.extra! as ChatRoomDetailArgs;
 
-          return ChatRoomDetail(
-            room: args.room,
+          return BlocProvider<ChatRoomDetailBloc>(
+            create: (context) => sl(param1: args.room),
+            child: const ChatRoomDetail(),
           );
         }),
     GoRoute(

@@ -4,7 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
-import 'package:categorease/feature/chat/bloc/chat_bloc.dart';
+import 'package:categorease/feature/chat/bloc/chat_room/chat_bloc.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';

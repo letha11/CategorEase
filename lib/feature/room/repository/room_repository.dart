@@ -148,11 +148,11 @@ class RoomRepositoryImpl implements RoomRepository {
     try {
       Map<String, dynamic> data = {
         'name': roomName,
-        'users': usersId,
+        'users': usersId.join(','),
       };
 
       if (categoriesId != null || (categoriesId?.isNotEmpty ?? false)) {
-        data['categories'] = categoriesId;
+        data['categories'] = categoriesId?.join(',');
       }
 
       final response = await _dioClient.dioWithToken.put(
