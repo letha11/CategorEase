@@ -80,11 +80,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/create-category',
       builder: (context, state) {
-        assert(state.extra != null, '`extra` is required');
-        assert(state.extra is CreateCategoryArgs,
-            '`extra` must be CreateCategoryArgs');
-        final args = state.extra! as CreateCategoryArgs;
-
         return MultiBlocProvider(
           providers: [
             BlocProvider<CreateCategoryCubit>(
@@ -94,9 +89,7 @@ final GoRouter appRouter = GoRouter(
               create: (context) => sl(),
             ),
           ],
-          child: CreateCategory(
-            rooms: args.rooms,
-          ),
+          child: const CreateCategory(),
         );
       },
     ),

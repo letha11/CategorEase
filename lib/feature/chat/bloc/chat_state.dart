@@ -12,7 +12,7 @@ class ChatInitialLoading extends ChatState {}
 
 class ChatInitialLoaded extends ChatState {
   /// Loading state when fetching next page on pagination.
-  final NextPageStatus nextPageStatus;
+  final Status nextPageStatus;
   final Failure? nextPageFailure;
   final PaginationApiResponse<Chat> chats;
   final Room roomDetail;
@@ -20,12 +20,12 @@ class ChatInitialLoaded extends ChatState {
   ChatInitialLoaded({
     required this.chats,
     required this.roomDetail,
-    this.nextPageStatus = NextPageStatus.initial,
+    this.nextPageStatus = Status.initial,
     this.nextPageFailure,
   });
 
   ChatInitialLoaded copyWith({
-    NextPageStatus? nextPageStatus,
+    Status? nextPageStatus,
     Failure? nextPageFailure,
     PaginationApiResponse<Chat>? chats,
     Room? roomDetail,

@@ -89,8 +89,6 @@ class _HomePageState extends State<HomePage> {
                             dynamic shouldRefresh =
                                 await GoRouter.of(context).push(
                               '/create-category',
-                              extra:
-                                  CreateCategoryArgs(rooms: state.rooms.data),
                             );
 
                             if (shouldRefresh is bool && shouldRefresh) {
@@ -128,8 +126,6 @@ class _HomePageState extends State<HomePage> {
                                   dynamic shouldRefresh =
                                       await GoRouter.of(context).push(
                                     '/create-category',
-                                    extra: CreateCategoryArgs(
-                                        rooms: state.rooms.data),
                                   );
 
                                   if (shouldRefresh is bool && shouldRefresh) {

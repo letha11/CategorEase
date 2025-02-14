@@ -96,7 +96,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ChatInitialLoaded(
         chats: chats,
         roomDetail: roomDetail,
-        nextPageStatus: NextPageStatus.initial,
+        nextPageStatus: Status.initial,
       ),
     );
   }
@@ -116,7 +116,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     emit(
       castedState.copyWith(
-        nextPageStatus: NextPageStatus.loading,
+        nextPageStatus: Status.loading,
       ),
     );
 
@@ -125,13 +125,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     result.fold(
       (l) => emit(
         castedState.copyWith(
-          nextPageStatus: NextPageStatus.error,
+          nextPageStatus: Status.error,
           nextPageFailure: l,
         ),
       ),
       (r) => emit(
         castedState.copyWith(
-          nextPageStatus: NextPageStatus.loaded,
+          nextPageStatus: Status.loaded,
           chats: r.copyWith(
             data: castedState.chats.data + r.data,
           ),

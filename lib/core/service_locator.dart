@@ -98,6 +98,7 @@ void initServiceLocator() {
   sl.registerFactory(
     () => CreateCategoryBloc(
       categoryRepository: sl(),
+      roomRepository: sl(),
     ),
   );
   sl.registerFactory(

@@ -12,18 +12,18 @@ class SearchLoading extends SearchState {}
 
 class SearchLoaded extends SearchState {
   /// Loading state when fetching next page on pagination.
-  final NextPageStatus nextPageStatus;
+  final Status nextPageStatus;
   final Failure? nextPageFailure;
   final PaginationApiResponse<User> users;
 
   SearchLoaded({
     required this.users,
-    this.nextPageStatus = NextPageStatus.initial,
+    this.nextPageStatus = Status.initial,
     this.nextPageFailure,
   });
 
   SearchLoaded copyWith({
-    NextPageStatus? nextPageStatus,
+    Status? nextPageStatus,
     Failure? nextPageFailure,
     PaginationApiResponse<User>? users,
   }) {

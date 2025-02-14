@@ -14,3 +14,7 @@ class CreateCategoryCreate extends CreateCategoryEvent {
     required this.color,
   });
 }
+
+class CreateCategoryFetchRoom extends CreateCategoryEvent {}
+
+class CreateCategoryFetchNextRoom extends CreateCategoryEvent {}

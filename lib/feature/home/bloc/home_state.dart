@@ -11,7 +11,7 @@ class HomeInitial extends HomeState {}
 class HomeLoading extends HomeState {}
 
 class HomeLoaded extends HomeState {
-  final NextPageStatus nextPageStatus;
+  final Status nextPageStatus;
   final Failure? nextPageFailure;
   final PaginationApiResponse<Room> rooms;
   final List<Category>? categories;
@@ -23,7 +23,7 @@ class HomeLoaded extends HomeState {
     this.categories,
     this.websocketModels,
     this.nextPageFailure,
-    this.nextPageStatus = NextPageStatus.initial,
+    this.nextPageStatus = Status.initial,
     required this.authenticatedUser,
   }) : assert(rooms.data.isEmpty || websocketModels!.isNotEmpty,
             'Websocket models cannot be empty if rooms are not empty');
@@ -33,7 +33,7 @@ class HomeLoaded extends HomeState {
     List<Category>? categories,
     List<WebsocketModel>? websocketModels,
     User? authenticatedUser,
-    NextPageStatus? nextPageStatus,
+    Status? nextPageStatus,
     Failure? nextPageFailure,
   }) {
     return HomeLoaded(

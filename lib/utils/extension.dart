@@ -93,9 +93,9 @@ extension GoRouterExt on GoRouter {
   }
 }
 
-extension IsHelper on NextPageStatus {
-  bool get isInitial => this == NextPageStatus.initial;
-  bool get isLoading => this == NextPageStatus.loading;
-  bool get isLoaded => this == NextPageStatus.loaded;
-  bool get isError => this == NextPageStatus.error;
+extension IsHelper on Status {
+  bool get isInitial => this == Status.initial;
+  bool get isLoading => this == Status.loading;
+  bool get isLoaded => this == Status.loaded;
+  bool get isError => this == Status.error;
 }

@@ -1,12 +1,13 @@
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
-import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/gen/assets.gen.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:categorease/utils/widgets/error_widget.dart';
+import 'package:categorease/utils/widgets/loading.dart';
 import 'package:categorease/utils/widgets/loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,22 +15,37 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:go_router/go_router.dart';
 
-class CreateCategoryArgs {
-  final List<Room> rooms;
-
-  CreateCategoryArgs({required this.rooms});
-}
-
-class CreateCategory extends StatelessWidget {
-  CreateCategory({
+class CreateCategory extends StatefulWidget {
+  const CreateCategory({
     super.key,
-    required this.rooms,
   });
 
-  final List<Room> rooms;
+  @override
+  State<CreateCategory> createState() => _CreateCategoryState();
+}
 
+class _CreateCategoryState extends State<CreateCategory> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController nameController = TextEditingController();
+  late CreateCategoryBlocState blocState;
+
+  @override
+  void initState() {
+    context.read<CreateCategoryBloc>().add(CreateCategoryFetchRoom());
+
+    _scrollController.addListener(() {
+      if (blocState.rooms == null) return;
+
+      if (_scrollController.position.pixels <=
+          _scrollController.position.maxScrollExtent - 100) return;
+
+      if (blocState.roomStatus.isLoading) return;
+      context.read<CreateCategoryBloc>().add(CreateCategoryFetchNextRoom());
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +57,7 @@ class CreateCategory extends StatelessWidget {
         child: Stack(
           children: [
             CustomScrollView(
+              controller: _scrollController,
               slivers: [
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -156,14 +173,15 @@ class CreateCategory extends StatelessWidget {
                         BlocBuilder<CreateCategoryBloc,
                             CreateCategoryBlocState>(
                           builder: (context, state) {
-                            if (state is! CreateCategoryFailed) {
+                            if (state.createCategoryStatus.isError) {
                               return const SizedBox.shrink();
-                            } else if (!state.roomEmpty) {
+                            } else if (!state.isRoomEmpty) {
                               return const SizedBox.shrink();
                             }
 
                             return Text(
-                              state.failure.message,
+                              state.failure?.message ??
+                                  'Room must be selected at least 1',
                               style: AppTheme.textTheme.bodySmall?.copyWith(
                                 color: AppTheme.errorColor,
                               ),
@@ -175,111 +193,143 @@ class CreateCategory extends StatelessWidget {
                   ),
                 ),
                 BlocBuilder<CreateCategoryCubit, CreateCategoryState>(
-                  builder: (context, state) {
-                    return SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, i) {
-                            final room = rooms[i];
-                            return Column(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    context
-                                        .read<CreateCategoryCubit>()
-                                        .toggleSelectedRoom(room.id);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        5, 12.5, 5, 12.5),
-                                    child: Row(
-                                      children: [
-                                        Flexible(
-                                          flex: 1,
-                                          child: Container(
-                                            width: 20,
-                                            height: 20,
-                                            padding: const EdgeInsets.all(1),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: AppTheme.primaryInput,
-                                                width: 1,
-                                              ),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: state.selectedRooms
-                                                    .contains(room.id)
-                                                ? Container(
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color:
-                                                          AppTheme.activeColor,
-                                                    ),
-                                                  )
-                                                : const SizedBox.shrink(),
-                                          ),
-                                        ),
-                                        10.widthMargin,
-                                        Flexible(
-                                          flex: 5,
-                                          child: Row(
-                                            children: [
-                                              Flexible(
-                                                flex: 1,
-                                                child: Material(
-                                                  shape: const CircleBorder(),
-                                                  clipBehavior: Clip.antiAlias,
-                                                  color: Colors.transparent,
-                                                  child: Ink.image(
-                                                    image: AssetImage(room
-                                                                .participants
-                                                                .length >
-                                                            2
-                                                        ? Assets
-                                                            .images
-                                                            .groupDefaultPng
-                                                            .path
-                                                        : Assets
-                                                            .images
-                                                            .singleDefault
-                                                            .path),
-                                                    width: 50,
-                                                    height: 50,
+                  builder: (context, cubitState) {
+                    return BlocBuilder<CreateCategoryBloc,
+                        CreateCategoryBlocState>(
+                      builder: (context, bState) {
+                        if (bState.rooms == null) {
+                          return const SliverToBoxAdapter(
+                              child: SizedBox.shrink());
+                        }
+
+                        return SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, i) {
+                                final room = bState.rooms!.data[i];
+                                return Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        context
+                                            .read<CreateCategoryCubit>()
+                                            .toggleSelectedRoom(room.id);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            5, 12.5, 5, 12.5),
+                                        child: Row(
+                                          children: [
+                                            Flexible(
+                                              flex: 1,
+                                              child: Container(
+                                                width: 20,
+                                                height: 20,
+                                                padding:
+                                                    const EdgeInsets.all(1),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color:
+                                                        AppTheme.primaryInput,
+                                                    width: 1,
                                                   ),
+                                                  shape: BoxShape.circle,
                                                 ),
+                                                child: cubitState.selectedRooms
+                                                        .contains(room.id)
+                                                    ? Container(
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          color: AppTheme
+                                                              .activeColor,
+                                                        ),
+                                                      )
+                                                    : const SizedBox.shrink(),
                                               ),
-                                              10.widthMargin,
-                                              Expanded(
-                                                flex: 5,
-                                                child: Text(
-                                                  room.name,
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: AppTheme
-                                                      .textTheme.titleSmall,
-                                                ),
+                                            ),
+                                            10.widthMargin,
+                                            Flexible(
+                                              flex: 5,
+                                              child: Row(
+                                                children: [
+                                                  Flexible(
+                                                    flex: 1,
+                                                    child: Material(
+                                                      shape:
+                                                          const CircleBorder(),
+                                                      clipBehavior:
+                                                          Clip.antiAlias,
+                                                      color: Colors.transparent,
+                                                      child: Ink.image(
+                                                        image: AssetImage(room
+                                                                    .participants
+                                                                    .length >
+                                                                2
+                                                            ? Assets
+                                                                .images
+                                                                .groupDefaultPng
+                                                                .path
+                                                            : Assets
+                                                                .images
+                                                                .singleDefault
+                                                                .path),
+                                                        width: 50,
+                                                        height: 50,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  10.widthMargin,
+                                                  Expanded(
+                                                    flex: 5,
+                                                    child: Text(
+                                                      room.name,
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: AppTheme
+                                                          .textTheme.titleSmall,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                (12.5 / 2).heightMargin,
-                                const Divider(
-                                  height: 1,
-                                  color: AppTheme.primaryDivider,
-                                ),
-                              ],
-                            );
-                          },
-                          childCount: rooms.length,
+                                    (12.5 / 2).heightMargin,
+                                    const Divider(
+                                      height: 1,
+                                      color: AppTheme.primaryDivider,
+                                    ),
+                                  ],
+                                );
+                              },
+                              childCount: bState.rooms!.data.length,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                // Loading indicator of room fetching and next room fetching
+                BlocBuilder<CreateCategoryBloc, CreateCategoryBlocState>(
+                  builder: (context, state) {
+                    if (state.roomStatus.isLoading) {
+                      return const SliverPadding(
+                        padding: EdgeInsets.only(top: 15),
+                        sliver: SliverToBoxAdapter(
+                          child: Center(child: Loading()),
                         ),
-                      ),
+                      );
+                    }
+
+                    return const SliverToBoxAdapter(
+                      child: SizedBox.shrink(),
                     );
                   },
                 ),
@@ -296,7 +346,7 @@ class CreateCategory extends StatelessWidget {
                     builder: (context, state) {
                       return BottomBarButton(
                         child: ElevatedButton(
-                          onPressed: state is CreateCategoryLoading
+                          onPressed: state.createCategoryStatus.isLoading
                               ? null
                               : () {
                                   if (!formKey.currentState!.validate()) return;
@@ -331,9 +381,11 @@ class CreateCategory extends StatelessWidget {
             ),
             BlocConsumer<CreateCategoryBloc, CreateCategoryBlocState>(
               listener: (context, state) {
-                if (state is CreateCategorySuccess) {
+                blocState = state;
+                if (state.createCategoryStatus.isLoaded) {
                   context.pop(true);
-                } else if (state is CreateCategoryFailed && !state.roomEmpty) {
+                } else if (state.createCategoryStatus.isError &&
+                    !state.isRoomEmpty) {
                   showDialog(
                     context: context,
                     builder: (dialogContext) {
@@ -352,7 +404,8 @@ class CreateCategory extends StatelessWidget {
                           children: [
                             AppErrorWidget(
                               iconColor: AppTheme.errorColor,
-                              message: state.failure.message,
+                              message: state.failure?.message ??
+                                  const Failure().message,
                               subMessage: 'Please try again.',
                             ),
                           ],
@@ -439,7 +492,7 @@ class CreateCategory extends StatelessWidget {
                 }
               },
               builder: (context, state) {
-                if (state is CreateCategoryLoading) {
+                if (state.createCategoryStatus.isLoading) {
                   return const LoadingOverlay();
                 }
 

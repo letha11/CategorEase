@@ -35,4 +35,4 @@ class Constants {
   }
 }
 
-enum NextPageStatus { initial, loading, loaded, error }
+enum Status { initial, loading, loaded, error }

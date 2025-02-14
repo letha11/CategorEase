@@ -57,7 +57,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     emit(currentState.copyWith(
       rooms: currentState.rooms.copyWith(data: []),
-      nextPageStatus: NextPageStatus.loading,
+      nextPageStatus: Status.loading,
     ));
 
     // if (event.categoryId == null || event.categoryId == 0) {
@@ -70,7 +70,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     await result.fold(
       (l) async => emit(currentState.copyWith(
-        nextPageStatus: NextPageStatus.error,
+        nextPageStatus: Status.error,
         nextPageFailure: l,
       )),
       (r) async {
@@ -79,7 +79,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
         emit(
           currentState.copyWith(
-            nextPageStatus: NextPageStatus.loaded,
+            nextPageStatus: Status.loaded,
             nextPageFailure: null,
             rooms: r,
             websocketModels: websocketModels,
@@ -168,7 +168,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     emit(
       castedState.copyWith(
-        nextPageStatus: NextPageStatus.loading,
+        nextPageStatus: Status.loading,
       ),
     );
 
@@ -180,7 +180,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     await result.fold(
       (l) async => emit(
         castedState.copyWith(
-          nextPageStatus: NextPageStatus.error,
+          nextPageStatus: Status.error,
           nextPageFailure: l,
         ),
       ),
@@ -193,7 +193,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
         emit(
           castedState.copyWith(
-            nextPageStatus: NextPageStatus.loaded,
+            nextPageStatus: Status.loaded,
             websocketModels: newWebsocketModels,
             rooms: newData,
           ),

@@ -31,7 +31,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       (l) => emit(SearchError(l)),
       (r) => emit(SearchLoaded(
         users: r,
-        nextPageStatus: NextPageStatus.initial,
+        nextPageStatus: Status.initial,
       )),
     );
   }
@@ -45,7 +45,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     // no next page left
     if (castedState.users.next == null) return;
 
-    emit(castedState.copyWith(nextPageStatus: NextPageStatus.loading));
+    emit(castedState.copyWith(nextPageStatus: Status.loading));
 
     final result = await _userRepository.getAllUser(
       page: castedState.users.next!,
@@ -55,12 +55,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     result.fold(
       (l) => emit(castedState.copyWith(
         nextPageFailure: l,
-        nextPageStatus: NextPageStatus.error,
+        nextPageStatus: Status.error,
       )),
       (r) {
         emit(
           castedState.copyWith(
-            nextPageStatus: NextPageStatus.loaded,
+            nextPageStatus: Status.loaded,
             users: r.copyWith(data: castedState.users.data + r.data),
           ),
         );
