@@ -1,7 +1,8 @@
 import 'package:categorease/core/service_locator.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
-import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
+import 'package:categorease/feature/category/bloc/choose_category/choose_category_bloc.dart';
+import 'package:categorease/feature/category/bloc/create_category/create_category_bloc.dart';
 import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
@@ -68,11 +69,26 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/choose-category',
-      builder: (BuildContext context, GoRouterState state) =>
-          BlocProvider<ChooseCategoryCubit>(
-        create: (context) => ChooseCategoryCubit(),
-        child: const ChooseCategory(),
-      ),
+      builder: (BuildContext context, GoRouterState state) {
+        assert(state.extra != null, '`extra` is required');
+        assert(state.extra is ChooseCategoryArgs,
+            '`extra` must be ChooseCategoryArgs');
+        final args = state.extra! as ChooseCategoryArgs;
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<ChooseCategoryCubit>(
+              create: (context) => ChooseCategoryCubit(),
+            ),
+            BlocProvider<ChooseCategoryBloc>(
+              create: (_) => sl<ChooseCategoryBloc>(param1: args.currentRoom),
+            ),
+          ],
+          child: ChooseCategory(
+            currentRoom: args.currentRoom,
+          ),
+        );
+      },
     ),
     GoRoute(
       path: '/search',

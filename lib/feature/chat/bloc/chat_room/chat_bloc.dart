@@ -24,7 +24,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final RoomRepository _roomRepository;
   final RoomReactiveRepository _roomReactiveRepository;
   final ChatRoomArgs _args;
-  late final StreamSubscription _subscription;
+  late final StreamSubscription _websocketSubscription;
+  late final StreamSubscription _roomSubscription;
   late final int roomId;
 
   ChatBloc({
@@ -37,7 +38,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         _roomRepository = roomRepository,
         _args = args,
         super(ChatInitial()) {
-    _subscription = _args.websocketModel.broadcastStream.listen((data) {
+    _websocketSubscription =
+        _args.websocketModel.broadcastStream.listen((data) {
       if (data is! String) return;
       if (state is! ChatInitialLoaded) return;
       final loadedState = state as ChatInitialLoaded;
@@ -108,6 +110,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     if (state is ChatInitialError) return;
 
+    _roomSubscription = _roomReactiveRepository.stream.listen((room) {
+      if (room.id == roomId) {
+        add(UpdateRoomDetail(room: room));
+      }
+    });
+
     emit(
       ChatInitialLoaded(
         chats: chats,
@@ -115,12 +123,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         nextPageStatus: Status.initial,
       ),
     );
-
-    _roomReactiveRepository.stream.listen((room) {
-      if (room.id == roomId) {
-        add(UpdateRoomDetail(room: room));
-      }
-    });
   }
 
   _onFetchChatNextPage(FetchChatNextPage event, Emitter<ChatState> emit) async {
@@ -164,7 +166,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   @override
   Future<void> close() {
-    _subscription.cancel();
+    _websocketSubscription.cancel();
+    _roomSubscription.cancel();
     return super.close();
   }
 }

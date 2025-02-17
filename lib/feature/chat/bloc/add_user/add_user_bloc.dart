@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:categorease/core/failures.dart';
+import 'package:categorease/feature/chat/repository/room_reactive_repository.dart';
 import 'package:categorease/feature/home/model/user.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
@@ -14,15 +15,18 @@ part 'add_user_state.dart';
 class AddUserBloc extends Bloc<AddUserEvent, AddUserState> {
   final UserRepository _userRepository;
   final RoomRepository _roomRepository;
+  final RoomReactiveRepository _roomReactiveRepository;
   final Room currentRoom;
   String? username;
 
   AddUserBloc({
     required UserRepository userRepository,
     required RoomRepository roomRepository,
+    required RoomReactiveRepository roomReactiveRepository,
     required this.currentRoom,
   })  : _userRepository = userRepository,
         _roomRepository = roomRepository,
+        _roomReactiveRepository = roomReactiveRepository,
         super(AddUserInitial()) {
     on<AddUserFetchUser>(_onFetchUser);
     on<AddUserFetchUserNextPage>(_onFetchUserNextPage);
@@ -55,10 +59,14 @@ class AddUserBloc extends Bloc<AddUserEvent, AddUserState> {
 
     updatedRoom.fold(
       (l) => emit(castedState.copyWith(updatingStatus: Status.error)),
-      (r) => emit(castedState.copyWith(
-        updatingStatus: Status.loaded,
-        updatedRoom: r.data,
-      )),
+      (r) {
+        _roomReactiveRepository.updateRoom(r.data!);
+
+        emit(castedState.copyWith(
+          updatingStatus: Status.loaded,
+          updatedRoom: r.data,
+        ));
+      },
     );
   }
 

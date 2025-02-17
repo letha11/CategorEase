@@ -28,3 +28,11 @@ class UpdateLastViewedRoom extends HomeEvent {
 
   UpdateLastViewedRoom({required this.roomId});
 }
+
+class UpdateUpdatedRoom extends HomeEvent {
+  final Room updatedRoom;
+
+  UpdateUpdatedRoom({
+    required this.updatedRoom,
+  });
+}

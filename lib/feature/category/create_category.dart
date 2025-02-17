@@ -1,6 +1,6 @@
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/core/failures.dart';
-import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
+import 'package:categorease/feature/category/bloc/create_category/create_category_bloc.dart';
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';

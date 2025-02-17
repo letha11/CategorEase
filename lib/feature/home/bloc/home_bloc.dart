@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:bloc/bloc.dart';
@@ -7,6 +8,7 @@ import 'package:categorease/feature/category/model/category.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
 import 'package:categorease/feature/chat/repository/participant_repository.dart';
+import 'package:categorease/feature/chat/repository/room_reactive_repository.dart';
 import 'package:categorease/feature/home/model/user.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
@@ -22,20 +24,24 @@ part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final RoomRepository _roomRepository;
+  final RoomReactiveRepository _roomReactiveRepository;
   final CategoryRepository _categoryRepository;
   final ParticipantRepository _participantRepository;
   final AuthStorage _authStorage;
   final WebsocketHelper _websocketHelper;
   late PaginationApiResponse<Room> _savedResponse;
+  late final StreamSubscription _subscription;
   int? savedCategoryId;
 
   HomeBloc({
     required RoomRepository roomRepository,
+    required RoomReactiveRepository roomReactiveRepository,
     required CategoryRepository categoryRepository,
     required ParticipantRepository participantRepository,
     required AuthStorage authStorage,
     required WebsocketHelper websocketHelper,
   })  : _roomRepository = roomRepository,
+        _roomReactiveRepository = roomReactiveRepository,
         _categoryRepository = categoryRepository,
         _participantRepository = participantRepository,
         _websocketHelper = websocketHelper,
@@ -46,6 +52,31 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<UpdateLastChatRoom>(_onUpdateLastChatRoom);
     on<UpdateLastViewedRoom>(_onUpdateLastViewedRoom);
     on<FilterHomeByCategory>(_onFilterHomeByCategory);
+    on<UpdateUpdatedRoom>(_onUpdateUpdatedRoom);
+
+    _subscription = _roomReactiveRepository.stream.listen((room) {
+      add(UpdateUpdatedRoom(updatedRoom: room));
+    });
+  }
+
+  void _onUpdateUpdatedRoom(
+      UpdateUpdatedRoom event, Emitter<HomeState> emit) async {
+    if (state is! HomeLoaded) return;
+
+    final currentState = state as HomeLoaded;
+    final updatedRooms = currentState.rooms.data.map((room) {
+      if (room.id == event.updatedRoom.id) {
+        return room.copyWith(categories: event.updatedRoom.categories);
+      }
+
+      return room;
+    }).toList();
+
+    emit(
+      currentState.copyWith(
+        rooms: currentState.rooms.copyWith(data: updatedRooms),
+      ),
+    );
   }
 
   void _onFilterHomeByCategory(
@@ -59,11 +90,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       rooms: currentState.rooms.copyWith(data: []),
       nextPageStatus: Status.loading,
     ));
-
-    // if (event.categoryId == null || event.categoryId == 0) {
-    //   emit(currentState.copyWith(rooms: _savedResponse));
-    //   return;
-    // }
 
     final result =
         await _roomRepository.getAllAssociated(categoryId: event.categoryId);
@@ -300,5 +326,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     return websocketModels;
+  }
+
+  @override
+  Future<void> close() {
+    _subscription.cancel();
+    return super.close();
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/chat/repository/room_reactive_repository.dart';
@@ -14,6 +16,7 @@ class ChatRoomDetailBloc
     extends Bloc<ChatRoomDetailEvent, ChatRoomDetailState> {
   final RoomRepository _roomRepository;
   final RoomReactiveRepository _roomReactiveRepository;
+  late final StreamSubscription _subscription;
 
   ChatRoomDetailBloc(
       {required RoomRepository roomRepository,
@@ -24,12 +27,15 @@ class ChatRoomDetailBloc
         super(ChatRoomDetailState(room: room)) {
     on<ChatRoomDetailUpdateRoom>(_onUpdateRoom);
     on<ChatRoomDetailRemoveUser>(_onChatRoomDetailRemoveUser);
+
+    _subscription = _roomReactiveRepository.stream.listen((room) {
+      add(ChatRoomDetailUpdateRoom(updatedRoom: room));
+    });
   }
 
   /// This purpose only for updating the current state with updated room on another page
   void _onUpdateRoom(
       ChatRoomDetailUpdateRoom event, Emitter<ChatRoomDetailState> emit) async {
-    _roomReactiveRepository.updateRoom(event.updatedRoom);
     emit(state.copyWith(room: event.updatedRoom));
   }
 
@@ -60,5 +66,11 @@ class ChatRoomDetailBloc
         emit(state.copyWith(status: Status.loaded, room: updatedRoom));
       },
     );
+  }
+
+  @override
+  Future<void> close() {
+    _subscription.cancel();
+    return super.close();
   }
 }

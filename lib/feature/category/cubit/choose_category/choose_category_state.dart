@@ -1,27 +1,20 @@
 part of 'choose_category_cubit.dart';
 
-final class ChooseCategoryState extends Equatable {
-  final List<Category> categories;
+final class ChooseCategoryCubitState extends Equatable {
   final List<Category> selectedCategories;
 
-  const ChooseCategoryState({
-    required this.categories,
+  const ChooseCategoryCubitState({
     required this.selectedCategories,
   });
 
-  ChooseCategoryState copyWith({
-    List<Category>? categories,
+  ChooseCategoryCubitState copyWith({
     List<Category>? selectedCategories,
   }) {
-    return ChooseCategoryState(
-      categories: categories ?? this.categories,
+    return ChooseCategoryCubitState(
       selectedCategories: selectedCategories ?? this.selectedCategories,
     );
   }
 
   @override
-  List<Object?> get props => [
-        categories,
-        selectedCategories,
-      ];
+  List<Object?> get props => [selectedCategories];
 }

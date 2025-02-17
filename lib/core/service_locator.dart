@@ -3,7 +3,8 @@ import 'package:categorease/core/auth_storage.dart';
 import 'package:categorease/core/dio_client.dart';
 import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
-import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
+import 'package:categorease/feature/category/bloc/choose_category/choose_category_bloc.dart';
+import 'package:categorease/feature/category/bloc/create_category/create_category_bloc.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
 import 'package:categorease/feature/chat/bloc/add_user/add_user_bloc.dart';
 import 'package:categorease/feature/chat/bloc/chat_room/chat_bloc.dart';
@@ -88,6 +89,7 @@ void initServiceLocator() {
   );
   sl.registerFactory(
     () => HomeBloc(
+      roomReactiveRepository: sl(),
       participantRepository: sl(),
       roomRepository: sl(),
       categoryRepository: sl(),
@@ -123,8 +125,17 @@ void initServiceLocator() {
   );
   sl.registerFactoryParam<AddUserBloc, Room, void>(
     (currentRoom, _) => AddUserBloc(
+      roomReactiveRepository: sl(),
       userRepository: sl(),
       roomRepository: sl(),
+      currentRoom: currentRoom,
+    ),
+  );
+  sl.registerFactoryParam<ChooseCategoryBloc, Room, void>(
+    (currentRoom, _) => ChooseCategoryBloc(
+      categoryRepository: sl(),
+      roomRepository: sl(),
+      roomReactiveRepository: sl(),
       currentRoom: currentRoom,
     ),
   );
