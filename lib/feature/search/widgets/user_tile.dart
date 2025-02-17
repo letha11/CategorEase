@@ -6,9 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class UserTile extends StatelessWidget {
-  const UserTile({super.key, required this.username});
+  const UserTile({
+    super.key,
+    required this.username,
+    this.onTap,
+    this.prefix,
+  });
 
+  final VoidCallback? onTap;
   final String username;
+  final Widget? prefix;
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +23,14 @@ class UserTile extends StatelessWidget {
       children: [
         7.heightMargin,
         InkWell(
-          onTap: () => _showConfirmationDialog(context),
+          onTap: onTap,
           child: Container(
             padding:
                 const EdgeInsets.only(top: 7, bottom: 7, left: 16, right: 16),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                prefix ?? const SizedBox(),
                 Expanded(
                   child: Row(
                     children: [

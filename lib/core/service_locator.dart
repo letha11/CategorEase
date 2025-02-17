@@ -5,11 +5,13 @@ import 'package:categorease/feature/authentication/bloc/auth_bloc.dart';
 import 'package:categorease/feature/authentication/repository/auth_repository.dart';
 import 'package:categorease/feature/category/bloc/create_category_bloc.dart';
 import 'package:categorease/feature/category/repository/category_repository.dart';
+import 'package:categorease/feature/chat/bloc/add_user/add_user_bloc.dart';
 import 'package:categorease/feature/chat/bloc/chat_room/chat_bloc.dart';
 import 'package:categorease/feature/chat/bloc/chat_room_detail/bloc/chat_room_detail_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/repository/chat_repository.dart';
 import 'package:categorease/feature/chat/repository/participant_repository.dart';
+import 'package:categorease/feature/chat/repository/room_reactive_repository.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
@@ -75,6 +77,9 @@ void initServiceLocator() {
       logger: sl(),
     ),
   );
+  sl.registerLazySingleton<RoomReactiveRepository>(
+    () => RoomReactiveRepositoryImpl(),
+  );
 
   sl.registerFactory(
     () => AuthBloc(
@@ -95,6 +100,7 @@ void initServiceLocator() {
       args: args,
       chatRepository: sl(),
       roomRepository: sl(),
+      roomReactiveRepository: sl(),
     ),
   );
   sl.registerFactory(
@@ -111,7 +117,15 @@ void initServiceLocator() {
   sl.registerFactoryParam<ChatRoomDetailBloc, Room, void>(
     (room, _) => ChatRoomDetailBloc(
       roomRepository: sl(),
+      roomReactiveRepository: sl(),
       room: room,
+    ),
+  );
+  sl.registerFactoryParam<AddUserBloc, Room, void>(
+    (currentRoom, _) => AddUserBloc(
+      userRepository: sl(),
+      roomRepository: sl(),
+      currentRoom: currentRoom,
     ),
   );
 }

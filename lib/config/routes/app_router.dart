@@ -6,10 +6,13 @@ import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/category/cubit/choose_category/choose_category_cubit.dart';
 import 'package:categorease/feature/category/cubit/create_category/create_category_cubit.dart';
+import 'package:categorease/feature/chat/add_user_room.dart';
+import 'package:categorease/feature/chat/bloc/add_user/add_user_bloc.dart';
 import 'package:categorease/feature/chat/bloc/chat_room/chat_bloc.dart';
 import 'package:categorease/feature/chat/bloc/chat_room_detail/bloc/chat_room_detail_bloc.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/chat_room_detail.dart';
+import 'package:categorease/feature/chat/cubit/add_user_room/add_user_room_cubit.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
 import 'package:categorease/feature/room/create_room.dart';
@@ -137,6 +140,27 @@ final GoRouter appRouter = GoRouter(
       path: '/create-room',
       builder: (BuildContext context, GoRouterState state) {
         return const CreateRoom();
+      },
+    ),
+    GoRoute(
+      path: '/add-user-room',
+      builder: (BuildContext context, GoRouterState state) {
+        assert(state.extra != null, '`extra` is required');
+        assert(
+            state.extra is AddUserRoomArgs, '`extra` must be AddUserRoomArgs');
+        final args = state.extra! as AddUserRoomArgs;
+
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider<AddUserBloc>(
+              create: (_) => sl<AddUserBloc>(param1: args.currentRoom),
+            ),
+            BlocProvider<AddUserRoomCubit>(
+              create: (_) => AddUserRoomCubit(),
+            ),
+          ],
+          child: const AddUserRoom(),
+        );
       },
     ),
   ],

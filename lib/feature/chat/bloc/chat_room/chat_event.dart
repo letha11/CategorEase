@@ -3,6 +3,12 @@ part of 'chat_bloc.dart';
 @immutable
 abstract class ChatEvent {}
 
+class UpdateRoomDetail extends ChatEvent {
+  final Room room;
+
+  UpdateRoomDetail({required this.room});
+}
+
 class FetchChat extends ChatEvent {
   final int roomId;
 

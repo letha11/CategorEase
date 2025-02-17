@@ -1,6 +1,7 @@
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/category/widget/bottom_bar_button.dart';
+import 'package:categorease/feature/chat/add_user_room.dart';
 import 'package:categorease/feature/chat/bloc/chat_room_detail/bloc/chat_room_detail_bloc.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/widgets/category_chip.dart';
@@ -219,7 +220,25 @@ class _ChatRoomDetailState extends State<ChatRoomDetail> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            final result = await context.push(
+                              '/add-user-room',
+                              extra: AddUserRoomArgs(
+                                currentRoom: context
+                                    .read<ChatRoomDetailBloc>()
+                                    .state
+                                    .room,
+                              ),
+                            );
+
+                            if (result != null && result is Room) {
+                              context.read<ChatRoomDetailBloc>().add(
+                                    ChatRoomDetailUpdateRoom(
+                                      updatedRoom: result,
+                                    ),
+                                  );
+                            }
+                          },
                           child: const Text('Add User'),
                         ),
                       ),

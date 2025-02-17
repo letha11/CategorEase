@@ -6,6 +6,7 @@ import 'package:categorease/core/failures.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/chat/model/chat.dart';
 import 'package:categorease/feature/chat/repository/chat_repository.dart';
+import 'package:categorease/feature/chat/repository/room_reactive_repository.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/utils/api_response.dart';
@@ -21,6 +22,7 @@ part 'chat_state.dart';
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository _chatRepository;
   final RoomRepository _roomRepository;
+  final RoomReactiveRepository _roomReactiveRepository;
   final ChatRoomArgs _args;
   late final StreamSubscription _subscription;
   late final int roomId;
@@ -28,8 +30,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatBloc({
     required ChatRepository chatRepository,
     required RoomRepository roomRepository,
+    required RoomReactiveRepository roomReactiveRepository,
     required ChatRoomArgs args,
   })  : _chatRepository = chatRepository,
+        _roomReactiveRepository = roomReactiveRepository,
         _roomRepository = roomRepository,
         _args = args,
         super(ChatInitial()) {
@@ -48,6 +52,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ));
     });
 
+    on<UpdateRoomDetail>(_onUpdateRoomDetail);
     on<FetchChat>(_onFetchChat);
     on<FetchChatNextPage>(_onFetchChatNextPage);
     on<SendChatMessage>((event, emit) {
@@ -66,6 +71,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ),
       ));
     });
+  }
+
+  _onUpdateRoomDetail(UpdateRoomDetail event, Emitter<ChatState> emit) async {
+    if (state is! ChatInitialLoaded) return;
+    final loadedState = state as ChatInitialLoaded;
+
+    emit(
+      loadedState.copyWith(
+        roomDetail: event.room,
+      ),
+    );
   }
 
   _onFetchChat(FetchChat event, Emitter<ChatState> emit) async {
@@ -99,6 +115,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         nextPageStatus: Status.initial,
       ),
     );
+
+    _roomReactiveRepository.stream.listen((room) {
+      if (room.id == roomId) {
+        add(UpdateRoomDetail(room: room));
+      }
+    });
   }
 
   _onFetchChatNextPage(FetchChatNextPage event, Emitter<ChatState> emit) async {

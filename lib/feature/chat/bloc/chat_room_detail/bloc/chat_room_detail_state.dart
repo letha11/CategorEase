@@ -3,12 +3,12 @@ part of 'chat_room_detail_bloc.dart';
 class ChatRoomDetailState extends Equatable {
   final Status status;
   final Failure? failure;
-  final Room? room;
+  final Room room;
 
   const ChatRoomDetailState({
     this.status = Status.initial,
     this.failure,
-    this.room,
+    required this.room,
   });
 
   ChatRoomDetailState copyWith({
