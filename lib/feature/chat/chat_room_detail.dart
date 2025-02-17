@@ -161,8 +161,12 @@ class _ChatRoomDetailState extends State<ChatRoomDetail> {
                                     ],
                                   ),
                                   // a room cannot have less than 2 participants
-                                  if ((state.room?.participants ?? []).length >=
-                                      3)
+                                  if ((state.room.participants).length >= 3 &&
+                                      (context.read<HomeBloc>().state
+                                                  as HomeLoaded)
+                                              .authenticatedUser
+                                              .username !=
+                                          participant.user.username)
                                     TextButton(
                                       style: TextButton.styleFrom(
                                         padding: EdgeInsets.zero,
