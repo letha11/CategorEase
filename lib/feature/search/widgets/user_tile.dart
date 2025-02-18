@@ -70,23 +70,4 @@ class UserTile extends StatelessWidget {
       ],
     );
   }
-
-  _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return ConfirmationDialog(
-          title: 'Create a room with this person ?',
-          subtitle: 'Are you sure you want to chat with this person?',
-          rejectAction: () {
-            context.pop();
-          },
-          confirmAction: () {
-            context.pop();
-            context.push('/create-room');
-          },
-        );
-      },
-    );
-  }
 }

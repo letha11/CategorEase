@@ -16,6 +16,7 @@ import 'package:categorease/feature/chat/chat_room_detail.dart';
 import 'package:categorease/feature/chat/cubit/add_user_room/add_user_room_cubit.dart';
 import 'package:categorease/feature/chat/cubit/chat_room/chat_room_cubit.dart';
 import 'package:categorease/feature/home/cubit/home_page/home_page_cubit.dart';
+import 'package:categorease/feature/room/bloc/create_room/create_room_bloc.dart';
 import 'package:categorease/feature/room/create_room.dart';
 import 'package:categorease/feature/search/bloc/search_bloc.dart';
 import 'package:categorease/feature/search/search_page.dart';
@@ -155,7 +156,16 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/create-room',
       builder: (BuildContext context, GoRouterState state) {
-        return const CreateRoom();
+        assert(state.extra != null, '`extra` is required');
+        assert(state.extra is CreateRoomArgs, '`extra` must be CreateRoomArgs');
+        final args = state.extra! as CreateRoomArgs;
+
+        return BlocProvider<CreateRoomBloc>(
+          create: (_) => sl(),
+          child: CreateRoom(
+            selectedUser: args.user,
+          ),
+        );
       },
     ),
     GoRoute(

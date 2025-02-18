@@ -206,7 +206,20 @@ class _HomePageState extends State<HomePage> {
                       tag: 'search',
                       child: Material(
                         child: TextField(
-                          onTap: () => GoRouter.of(context).push('/search'),
+                          onTap: () async {
+                            final result =
+                                await GoRouter.of(context).push('/search');
+
+                            if (result == null && result != bool) return;
+
+                            context
+                                .read<HomePageCubit>()
+                                .toggleSelectedCategory(context
+                                    .read<HomePageCubit>()
+                                    .state
+                                    .selectedCategory);
+                            context.read<HomeBloc>().add(FetchDataHome());
+                          },
                           canRequestFocus: false,
                           decoration: InputDecoration(
                             hintText: 'Search for users',

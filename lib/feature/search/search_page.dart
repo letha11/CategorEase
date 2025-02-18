@@ -4,10 +4,12 @@ import 'package:categorease/config/routes/app_router.dart';
 import 'package:categorease/config/theme/app_theme.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
 import 'package:categorease/feature/home/model/user.dart';
+import 'package:categorease/feature/room/create_room.dart';
 import 'package:categorease/feature/search/bloc/search_bloc.dart';
 import 'package:categorease/feature/search/widgets/search_delegate.dart';
 import 'package:categorease/feature/search/widgets/user_tile.dart';
 import 'package:categorease/gen/assets.gen.dart';
+import 'package:categorease/utils/app_dialog.dart';
 import 'package:categorease/utils/extension.dart';
 import 'package:categorease/utils/widgets/app_refresh_indicator.dart';
 import 'package:categorease/utils/widgets/error_widget.dart';
@@ -16,6 +18,7 @@ import 'package:categorease/utils/widgets/no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -154,6 +157,7 @@ class _SearchPageState extends State<SearchPage> {
                     final User user = state.users.data[index];
                     return UserTile(
                       username: user.username,
+                      onTap: () => _showConfirmationDialog(context, user),
                     );
                   },
                   itemCount: state.users.data.length + 1,
@@ -187,6 +191,25 @@ class _SearchPageState extends State<SearchPage> {
           ],
         ),
       ),
+    );
+  }
+
+  _showConfirmationDialog(BuildContext context, User user) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return ConfirmationDialog(
+          title: 'Create a room with this person ?',
+          subtitle: 'Are you sure you want to chat with this person?',
+          rejectAction: () {
+            context.pop();
+          },
+          confirmAction: () {
+            context.pop();
+            context.push('/create-room', extra: CreateRoomArgs(user: user));
+          },
+        );
+      },
     );
   }
 

@@ -43,20 +43,18 @@ class RoomRepositoryImpl implements RoomRepository {
     required List<int> usersId,
     List<int>? categoriesId,
   }) async {
-    assert(usersId.length > 1, 'Room must have at least 2 users');
-
     try {
       Map<String, dynamic> data = {
         'name': roomName,
-        'users': usersId,
+        'users': usersId.join(','),
       };
 
       if (categoriesId != null || (categoriesId?.isNotEmpty ?? false)) {
-        data['categories'] = categoriesId;
+        data['categories'] = categoriesId?.join(',');
       }
 
       final response = await _dioClient.dioWithToken.post(
-        '/room',
+        '/room/',
         data: FormData.fromMap(data),
       );
 

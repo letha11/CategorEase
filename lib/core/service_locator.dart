@@ -14,6 +14,7 @@ import 'package:categorease/feature/chat/repository/chat_repository.dart';
 import 'package:categorease/feature/chat/repository/participant_repository.dart';
 import 'package:categorease/feature/chat/repository/room_reactive_repository.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
+import 'package:categorease/feature/room/bloc/create_room/create_room_bloc.dart';
 import 'package:categorease/feature/room/model/room.dart';
 import 'package:categorease/feature/room/repository/room_repository.dart';
 import 'package:categorease/feature/search/bloc/search_bloc.dart';
@@ -137,6 +138,11 @@ void initServiceLocator() {
       roomRepository: sl(),
       roomReactiveRepository: sl(),
       currentRoom: currentRoom,
+    ),
+  );
+  sl.registerFactory(
+    () => CreateRoomBloc(
+      roomRepository: sl(),
     ),
   );
 }
