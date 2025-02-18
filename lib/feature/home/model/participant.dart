@@ -7,11 +7,13 @@ part 'participant.g.dart';
 class Participant {
   final int id;
   final User user;
+  final ParticipantRole role;
   final DateTime lastViewed;
 
   Participant({
     required this.id,
     required this.user,
+    required this.role,
     required this.lastViewed,
   });
 
@@ -19,4 +21,11 @@ class Participant {
       _$ParticipantFromJson(json);
 
   Map<String, dynamic> toJson() => _$ParticipantToJson(this);
+}
+
+enum ParticipantRole {
+  @JsonValue('admin')
+  admin,
+  @JsonValue('member')
+  member,
 }

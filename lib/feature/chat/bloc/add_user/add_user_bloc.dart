@@ -34,10 +34,11 @@ class AddUserBloc extends Bloc<AddUserEvent, AddUserState> {
   }
 
   _onUpdateRoom(AddUserUpdateRoom event, Emitter<AddUserState> emit) async {
+    print("UPDATING ROOM");
     if (state is! AddUserLoaded) return;
 
     final castedState = state as AddUserLoaded;
-    castedState.copyWith(updatingStatus: Status.loading);
+    emit(castedState.copyWith(updatingStatus: Status.loading));
 
     final updatedUsersId = event.selectedUserIds +
         currentRoom.participants.map((e) => e.user.id).toList();

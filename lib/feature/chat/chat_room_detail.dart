@@ -124,6 +124,14 @@ class _ChatRoomDetailState extends State<ChatRoomDetail> {
                           itemCount: state.room?.participants.length ?? 0,
                           itemBuilder: (_, i) {
                             final participant = state.room?.participants[i];
+                            final authUser =
+                                (context.read<HomeBloc>().state as HomeLoaded)
+                                    .authenticatedUser;
+                            final authParticipant =
+                                state.room.participants.firstWhere(
+                              (p) => p.user.username == authUser.username,
+                            );
+
                             if (participant == null) {
                               return const NoData();
                             }
@@ -161,55 +169,55 @@ class _ChatRoomDetailState extends State<ChatRoomDetail> {
                                       ),
                                     ],
                                   ),
-                                  // a room cannot have less than 2 participants
-                                  if ((state.room.participants).length >= 3 &&
-                                      (context.read<HomeBloc>().state
-                                                  as HomeLoaded)
-                                              .authenticatedUser
-                                              .username !=
-                                          participant.user.username)
-                                    TextButton(
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (_) {
-                                            return ConfirmationDialog(
-                                              title:
-                                                  'Remove ${participant.user.username} ?',
-                                              subtitle:
-                                                  'Are you sure you want to remove this user?',
-                                              rejectAction: () => context.pop(),
-                                              confirmTextColor:
-                                                  AppTheme.primaryText,
-                                              confirmBackgroundColor:
-                                                  AppTheme.errorColor,
-                                              confirmAction: () {
-                                                context
-                                                    .read<ChatRoomDetailBloc>()
-                                                    .add(
-                                                      ChatRoomDetailRemoveUser(
-                                                        userId:
-                                                            participant.user.id,
-                                                      ),
-                                                    );
-                                                context.pop();
-                                              },
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Text(
-                                        "Remove",
-                                        style: AppTheme.textTheme.labelMedium
-                                            ?.copyWith(
-                                          fontSize: 14,
-                                          color: AppTheme.errorColor,
+                                  if (authParticipant.role.isAdmin)
+                                    // a room cannot have less than 2 participants
+                                    if ((state.room.participants).length >= 3 &&
+                                        authUser.username !=
+                                            participant.user.username)
+                                      TextButton(
+                                        style: TextButton.styleFrom(
+                                          padding: EdgeInsets.zero,
                                         ),
-                                      ),
-                                    )
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (_) {
+                                              return ConfirmationDialog(
+                                                title:
+                                                    'Remove ${participant.user.username} ?',
+                                                subtitle:
+                                                    'Are you sure you want to remove this user?',
+                                                rejectAction: () =>
+                                                    context.pop(),
+                                                confirmTextColor:
+                                                    AppTheme.primaryText,
+                                                confirmBackgroundColor:
+                                                    AppTheme.errorColor,
+                                                confirmAction: () {
+                                                  context
+                                                      .read<
+                                                          ChatRoomDetailBloc>()
+                                                      .add(
+                                                        ChatRoomDetailRemoveUser(
+                                                          userId: participant
+                                                              .user.id,
+                                                        ),
+                                                      );
+                                                  context.pop();
+                                                },
+                                              );
+                                            },
+                                          );
+                                        },
+                                        child: Text(
+                                          "Remove",
+                                          style: AppTheme.textTheme.labelMedium
+                                              ?.copyWith(
+                                            fontSize: 14,
+                                            color: AppTheme.errorColor,
+                                          ),
+                                        ),
+                                      )
                                 ],
                               ),
                             );
@@ -222,24 +230,43 @@ class _ChatRoomDetailState extends State<ChatRoomDetail> {
                 BottomBarButton(
                   child: Column(
                     children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            context.push(
-                              '/add-user-room',
-                              extra: AddUserRoomArgs(
-                                currentRoom: context
-                                    .read<ChatRoomDetailBloc>()
-                                    .state
-                                    .room,
+                      BlocBuilder<ChatRoomDetailBloc, ChatRoomDetailState>(
+                        builder: (context, state) {
+                          // if isadmin
+                          final authParticipant =
+                              state.room.participants.firstWhere(
+                            (p) =>
+                                p.user.username ==
+                                (context.read<HomeBloc>().state as HomeLoaded)
+                                    .authenticatedUser
+                                    .username,
+                          );
+
+                          if (!authParticipant.role.isAdmin) {
+                            return const SizedBox.shrink();
+                          }
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  context.push(
+                                    '/add-user-room',
+                                    extra: AddUserRoomArgs(
+                                      currentRoom: context
+                                          .read<ChatRoomDetailBloc>()
+                                          .state
+                                          .room,
+                                    ),
+                                  );
+                                },
+                                child: const Text('Add User'),
                               ),
-                            );
-                          },
-                          child: const Text('Add User'),
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                      10.heightMargin,
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

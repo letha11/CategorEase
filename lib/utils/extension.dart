@@ -1,3 +1,5 @@
+import 'package:categorease/feature/chat/model/chat.dart';
+import 'package:categorease/feature/home/model/participant.dart';
 import 'package:categorease/utils/constants.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -103,4 +105,14 @@ extension IsHelper on Status {
   bool get isLoading => this == Status.loading;
   bool get isLoaded => this == Status.loaded;
   bool get isError => this == Status.error;
+}
+
+extension IsHelperChatType on ChatType {
+  bool get isText => this == ChatType.text;
+  bool get isImage => this == ChatType.image;
+}
+
+extension IsHelperParticipantRole on ParticipantRole {
+  bool get isAdmin => this == ParticipantRole.admin;
+  bool get isMember => this == ParticipantRole.member;
 }
