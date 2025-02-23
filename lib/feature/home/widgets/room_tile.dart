@@ -13,6 +13,7 @@ class RoomTile extends StatelessWidget {
     this.lastMessage,
     required this.unreadCount,
     this.onTap,
+    required this.chooseCategoryTap,
     this.lastMessageSentAt,
     this.categories,
     this.containerPadding =
@@ -27,6 +28,7 @@ class RoomTile extends StatelessWidget {
   final int unreadCount;
   final List<Widget>? categories;
   final VoidCallback? onTap;
+  final VoidCallback chooseCategoryTap;
   final EdgeInsetsGeometry containerPadding;
   final EdgeInsetsGeometry dividerPadding;
 
@@ -180,7 +182,7 @@ class RoomTile extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     context.pop();
-                    context.push('/choose-category');
+                    chooseCategoryTap();
                   },
                   style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
                         elevation: const WidgetStatePropertyAll(

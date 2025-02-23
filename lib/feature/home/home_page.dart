@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:categorease/config/theme/app_theme.dart';
+import 'package:categorease/feature/category/choose_category.dart';
 import 'package:categorease/feature/category/create_category.dart';
 import 'package:categorease/feature/chat/chat_room.dart';
 import 'package:categorease/feature/home/bloc/home_bloc.dart';
@@ -271,6 +272,12 @@ class _HomePageState extends State<HomePage> {
                       (context, index) {
                         final Room room = state.rooms.data[index];
                         return RoomTile(
+                          chooseCategoryTap: () {
+                            context.push(
+                              '/choose-category',
+                              extra: ChooseCategoryArgs(currentRoom: room),
+                            );
+                          },
                           onTap: () async {
                             context
                                 .read<HomeBloc>()

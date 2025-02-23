@@ -101,9 +101,6 @@ class _ChatRoomState extends State<ChatRoom> {
                           ),
                           width: 50,
                           height: 50,
-                          child: InkWell(
-                            onTap: () => _showProfileDialog(context),
-                          ),
                         ),
                       );
                     },
@@ -405,71 +402,6 @@ class _ChatRoomState extends State<ChatRoom> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showProfileDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          contentPadding: EdgeInsets.zero,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 300,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15),
-                    ),
-                    image: DecorationImage(
-                      image: AssetImage(Assets.images.singleDefault.path),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.pop();
-                    context.push('/choose-category');
-                  },
-                  style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                        elevation: const WidgetStatePropertyAll(
-                          0,
-                        ),
-                        overlayColor: WidgetStatePropertyAll(
-                            AppTheme.primaryText.withOpacity(0.1)),
-                        backgroundColor: const WidgetStatePropertyAll(
-                            AppTheme.primaryBackground),
-                        shape: WidgetStateProperty.all(
-                          const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(15),
-                              bottomRight: Radius.circular(15),
-                            ),
-                          ),
-                        ),
-                      ),
-                  child: SvgPicture.asset(
-                    Assets.icons.category,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

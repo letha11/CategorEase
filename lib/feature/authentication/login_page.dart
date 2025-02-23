@@ -143,7 +143,7 @@ class LoginPage extends StatelessWidget {
                       ),
                       25.heightMargin,
                       ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: null,
                         icon: SvgPicture.asset(Assets.icons.googleLogo),
                         label: const Text('Login with Google'),
                       ),
